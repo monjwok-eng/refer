@@ -1,390 +1,551 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, ChevronLeft, Upload, Check, Layout, Briefcase, Globe, Info, Loader2 } from 'lucide-react';
-import Navbar from './Navbar';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  ChevronRight,
+  ChevronLeft,
+  Briefcase,
+  Globe,
+  Layout,
+} from "lucide-react";
+import Navbar from "./Navbar";
 
-type Step = 'identity' | 'needs_website' | 'website_about' | 'website_name' | 'website_description' | 'website_url' | 'final';
+type Step =
+  | "identity"
+  | "company_size"
+  | "referral_goals"
+  | "lead_description"
+  | "needs_website";
 
 export default function BusinessOnboarding() {
-  const [currentStep, setCurrentStep] = useState<Step>('identity');
+  const [currentStep, setCurrentStep] = useState<Step>("identity");
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const navigate = useNavigate();
 
   const [businessData, setBusinessData] = useState({
-    name: localStorage.getItem('businessName') || '',
-    industry: '',
-    description: '',
+    name: localStorage.getItem("businessName") || "",
+    industry: "",
+    description: "",
+    companySize: "",
+    serviceFocus: "",
     logo: null as string | null,
-    website: '',
+    website: "",
     needsWebsite: null as boolean | null,
-    siteAbout: '',
-    siteName: '',
-    websiteDescription: ''
+    siteAbout: "",
+    siteName: "",
+    websiteDescription: "",
+    referralGoals: "",
   });
 
+  const getLoadingMessages = () => [
+    `Creating ${businessData.name || "your dashboard"}`,
+    "Setting up your workspace",
+    "Finalizing your hiring pipeline",
+    "Almost ready",
+  ];
+
+  React.useEffect(() => {
+    if (loading) {
+      const messages = getLoadingMessages();
+      const interval = setInterval(() => {
+        setLoadingStep((prev) =>
+          prev < messages.length - 1 ? prev + 1 : prev,
+        );
+      }, 800);
+      return () => clearInterval(interval);
+    }
+  }, [loading, businessData.name]);
+
   const industries = [
-    'Technology & Software',
-    'Creative & Design',
-    'Marketing & Sales',
-    'Business Services',
-    'Education & Training',
-    'Health & Wellness',
-    'Retail & E-commerce',
-    'Other'
+    "Technology & Software",
+    "Creative & Design",
+    "Marketing & Sales",
+    "Business Services",
+    "Education & Training",
+    "Health & Wellness",
+    "Retail & E-commerce",
+    "Other",
   ];
 
   const handleNext = () => {
-    if (currentStep === 'identity') setCurrentStep('needs_website');
-    else if (currentStep === 'needs_website') {
-      if (businessData.needsWebsite) setCurrentStep('website_about');
-      else setCurrentStep('website_url');
+    switch (currentStep) {
+      case "identity":
+        setCurrentStep("company_size");
+        break;
+      case "company_size":
+        setCurrentStep("referral_goals");
+        break;
+      case "referral_goals":
+        setCurrentStep("lead_description");
+        break;
+      case "lead_description":
+        setCurrentStep("needs_website");
+        break;
+      case "needs_website":
+        handleComplete();
+        break;
+      default:
+        break;
     }
-    else if (currentStep === 'website_about') setCurrentStep('website_name');
-    else if (currentStep === 'website_name') setCurrentStep('website_description');
-    else if (currentStep === 'website_description' || currentStep === 'website_url') setCurrentStep('final');
   };
 
   const handleBack = () => {
-    if (currentStep === 'needs_website') setCurrentStep('identity');
-    else if (currentStep === 'website_about' || currentStep === 'website_url') setCurrentStep('needs_website');
-    else if (currentStep === 'website_name') setCurrentStep('website_about');
-    else if (currentStep === 'website_description') setCurrentStep('website_name');
-    else if (currentStep === 'final') {
-      if (businessData.needsWebsite) setCurrentStep('website_description');
-      else setCurrentStep('website_url');
+    switch (currentStep) {
+      case "company_size":
+        setCurrentStep("identity");
+        break;
+      case "referral_goals":
+        setCurrentStep("company_size");
+        break;
+      case "lead_description":
+        setCurrentStep("referral_goals");
+        break;
+      case "needs_website":
+        setCurrentStep("lead_description");
+        break;
+      default:
+        break;
     }
   };
 
   const handleComplete = () => {
     setLoading(true);
     setTimeout(() => {
-      localStorage.setItem('isOnboarded', 'true');
-      navigate('/dashboard');
-    }, 1500);
+      localStorage.setItem("isOnboarded", "true");
+      localStorage.setItem("userType", "business");
+      localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("businessName", businessData.name);
+      navigate("/business-paywall");
+    }, 3500);
   };
 
+  const getStepNumber = () => {
+    const steps: Step[] = [
+      "identity",
+      "company_size",
+      "referral_goals",
+      "lead_description",
+      "needs_website",
+    ];
+    return steps.indexOf(currentStep) + 1;
+  };
 
+  const getProgressPercentage = () => {
+    return (getStepNumber() / 5) * 100;
+  };
+
+  const isNextDisabled = () => {
+    if (currentStep === "identity")
+      return !businessData.name || !businessData.industry;
+    if (currentStep === "company_size") return !businessData.companySize;
+    if (currentStep === "referral_goals") return !businessData.referralGoals;
+    if (currentStep === "lead_description") return !businessData.serviceFocus;
+    if (currentStep === "needs_website")
+      return businessData.needsWebsite === null;
+    return false;
+  };
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7] font-sans text-[#222325]">
-      <Navbar variant="skinny" />
+    <div className="relative flex flex-col h-[100dvh] bg-white overflow-hidden">
+      {/* Loading Overlay */}
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/70 backdrop-blur-xl transition-all duration-700"
+          >
+            <div className="flex flex-col items-center max-w-sm px-6">
+              <div className="relative w-20 h-20 mb-10">
+                {/* Outer ring */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  className="absolute inset-0 rounded-full border-[3px] border-[#e4e5e7]"
+                />
+                {/* Active segment */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{
+                    duration: 1.2,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-[#1dbf73]"
+                />
+                {/* Center dot */}
+                <motion.div
+                  animate={{ scale: [0.8, 1, 0.8] }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="absolute inset-[32%] rounded-full bg-[#1dbf73]"
+                />
+              </div>
 
-      <main className="pt-20 pb-12 px-6 flex justify-center">
-        <div className="w-full max-w-[800px] bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          {/* Progress Bar */}
-          <div className="h-1.5 w-full bg-slate-100 flex">
-             <div 
-               className="h-full bg-[#1dbf73] transition-all duration-500" 
-               style={{ width: 
-                 currentStep === 'identity' ? '15%' : 
-                 currentStep === 'needs_website' ? '30%' : 
-                 currentStep === 'website_about' ? '45%' :
-                 currentStep === 'website_name' ? '60%' :
-                 currentStep === 'website_description' ? '75%' :
-                 currentStep === 'website_url' ? '75%' : '100%' 
-               }}
-             />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={loadingStep}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="flex flex-col items-center"
+                >
+                  <h3 className="text-[24px] font-black text-[#404145] mb-2 text-center tracking-tight">
+                    {getLoadingMessages()[loadingStep]}
+                  </h3>
+                  <p className="text-[#62646a] font-medium text-[16px]">
+                    One moment please...
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div
+        className={`flex flex-col h-full transition-all duration-1000 ${loading ? "scale-95 opacity-50" : "scale-100 opacity-100"}`}
+      >
+        <Navbar variant="skinny" />
+
+        <main className="flex-1 flex flex-col pt-24 md:pt-24 max-w-5xl w-full mx-auto px-4 lg:px-12 overflow-hidden">
+          {/* Progress Bar Fixed at Top */}
+          <div className="w-full pb-4 md:pb-10 flex items-center gap-3 md:gap-4 flex-shrink-0">
+            <span className="text-[11px] md:text-[14px] font-black text-[#1dbf73] tracking-widest">
+              {getStepNumber()}/5
+            </span>
+            <div className="flex-1 bg-[#f1f1f1] rounded-full h-1 overflow-hidden">
+              <div
+                className="bg-[#1dbf73] h-full transition-all duration-300 ease-out"
+                style={{ width: `${getProgressPercentage()}%` }}
+              ></div>
+            </div>
           </div>
 
-          <div className="p-8 md:p-12">
+          {/* Content Area */}
+          <div className="flex-1 w-full pb-12 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex justify-center">
             <AnimatePresence mode="wait">
-              {loading ? (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="space-y-6 py-12 flex flex-col items-center justify-center text-center"
-                >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="text-[#1dbf73] mb-4"
-                  >
-                    <Loader2 size={48} />
-                  </motion.div>
-                  <div className="space-y-2">
-                    <h2 className="text-2xl font-bold tracking-tight">Finalizing your workspace...</h2>
-                    <p className="text-slate-500 max-w-sm mx-auto">We're preparing your hiring pipeline and professional profile.</p>
-                  </div>
-                </motion.div>
-              ) : (
-                <>
-              {currentStep === 'identity' && (
+              {currentStep === "identity" && (
                 <motion.div
                   key="identity"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-8"
+                  className="w-full max-w-[600px] mt-2 md:mt-20"
                 >
-                  <div className="text-center max-w-lg mx-auto">
-                    <h2 className="text-3xl font-bold mb-3 tracking-tight">Tell us about your business</h2>
-                    <p className="text-slate-500 text-[15px]">Help us customize your workspace for the right results.</p>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-[#404145]">Business/Company Name</label>
-                        <input 
-                          type="text" 
-                          value={businessData.name}
-                          onChange={(e) => setBusinessData({...businessData, name: e.target.value})}
-                          placeholder="e.g. Acme Creative"
-                          className="w-full h-12 px-4 border border-slate-300 rounded focus:outline-none focus:border-[#1dbf73] transition-all"
-                        />
+                  <h2 className="text-[22px] md:text-[40px] font-black text-[#222325] tracking-tight leading-tight mb-2 md:mb-4">
+                    First, tell us about your business
+                  </h2>
+                  <p className="text-[14px] md:text-[18px] text-[#62646a] mb-4 md:mb-10 font-medium">
+                    Help us customize your workspace for the right results.
+                  </p>
+                  <div className="space-y-6 md:space-y-8 w-full">
+                    <div className="space-y-1.5 md:space-y-2">
+                      <label className="text-[13px] md:text-[14px] font-bold text-[#404145] mb-2 block">
+                        Business Name
+                      </label>
+                      <input
+                        type="text"
+                        value={businessData.name}
+                        onChange={(e) =>
+                          setBusinessData({
+                            ...businessData,
+                            name: e.target.value,
+                          })
+                        }
+                        placeholder="e.g. Acme Creative"
+                        className="w-full px-4 py-3.5 md:py-4 border border-[#e4e5e7] rounded-[4px] focus:outline-none focus:border-[#1dbf73] transition-colors bg-white text-[15px] md:text-[16px] text-[#404145] font-medium shadow-sm"
+                      />
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-[#404145]">Industry</label>
-                        <select 
-                          value={businessData.industry}
-                          onChange={(e) => setBusinessData({...businessData, industry: e.target.value})}
-                          className="w-full h-12 px-4 border border-slate-300 rounded focus:outline-none focus:border-[#1dbf73] transition-all bg-white"
-                        >
-                          <option value="">Select your industry</option>
-                          {industries.map(ind => <option key={ind} value={ind}>{ind}</option>)}
-                        </select>
+                    <div className="space-y-1.5 md:space-y-2">
+                      <label className="text-[13px] md:text-[14px] font-bold text-[#404145] mb-2 block">
+                        Industry
+                      </label>
+                      <select
+                        value={businessData.industry}
+                        onChange={(e) =>
+                          setBusinessData({
+                            ...businessData,
+                            industry: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3.5 md:py-4 border border-[#e4e5e7] rounded-[4px] focus:outline-none focus:border-[#1dbf73] transition-colors bg-white text-[15px] md:text-[16px] text-[#404145] font-medium shadow-sm appearance-none"
+                      >
+                        <option value="">Select your industry</option>
+                        {industries.map((ind) => (
+                          <option key={ind} value={ind}>
+                            {ind}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </motion.div>
               )}
 
-              {currentStep === 'needs_website' && (
+              {currentStep === "company_size" && (
+                <motion.div
+                  key="company_size"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="w-full max-w-[600px] mt-2 md:mt-20"
+                >
+                  <h2 className="text-[22px] md:text-[40px] font-black text-[#222325] tracking-tight leading-tight mb-2 md:mb-4">
+                    How big is your team?
+                  </h2>
+                  <p className="text-[14px] md:text-[18px] text-[#62646a] mb-4 md:mb-10 font-medium">
+                    This helps us understand your capacity for new referrals.
+                  </p>
+                  <div className="grid grid-cols-1 gap-2 md:gap-4">
+                    {[
+                      "1 - 10 employees",
+                      "11 - 50 employees",
+                      "51 - 200 employees",
+                      "200+ employees",
+                    ].map((size) => (
+                      <label
+                        key={size}
+                        className="group relative flex items-center p-5 border border-[#e4e5e7] bg-white rounded-[4px] cursor-pointer hover:border-[#1dbf73] transition-all duration-200 has-[:checked]:border-[#1dbf73] has-[:checked]:ring-1 has-[:checked]:ring-[#1dbf73] has-[:checked]:bg-[#fafafa]"
+                      >
+                        <input
+                          type="radio"
+                          name="companySize"
+                          className="peer opacity-0 absolute inset-0 cursor-pointer"
+                          value={size}
+                          checked={businessData.companySize === size}
+                          onChange={(e) =>
+                            setBusinessData({
+                              ...businessData,
+                              companySize: e.target.value,
+                            })
+                          }
+                        />
+                        <div className="flex-1">
+                          <span className="font-bold text-[15px] md:text-[16px] text-[#404145]">
+                            {size}
+                          </span>
+                        </div>
+                        <div className="ml-4 flex-shrink-0">
+                          <div className="w-5 h-5 rounded-full border border-[#c5c6c9] group-has-[:checked]:border-[#1dbf73] group-has-[:checked]:bg-[#1dbf73] flex items-center justify-center transition-colors">
+                            <svg
+                              className="w-3 h-3 text-white opacity-0 group-has-[:checked]:opacity-100"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="3"
+                                d="M5 13l4 4L19 7"
+                              ></path>
+                            </svg>
+                          </div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {currentStep === "referral_goals" && (
+                <motion.div
+                  key="referral_goals"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="w-full max-w-[600px] mt-2 md:mt-20"
+                >
+                  <h2 className="text-[22px] md:text-[40px] font-black text-[#222325] tracking-tight leading-tight mb-2 md:mb-4">
+                    What are your goals?
+                  </h2>
+                  <p className="text-[14px] md:text-[18px] text-[#62646a] mb-4 md:mb-10 font-medium">
+                    Help us tailor the referral experience.
+                  </p>
+                  <div className="w-full">
+                    <textarea
+                      value={businessData.referralGoals}
+                      onChange={(e) =>
+                        setBusinessData({
+                          ...businessData,
+                          referralGoals: e.target.value,
+                        })
+                      }
+                      placeholder="e.g. Find qualified partners to refer lead opportunities..."
+                      className="w-full h-32 md:h-48 px-4 py-3 border border-[#e4e5e7] rounded-[4px] focus:outline-none focus:border-[#1dbf73] transition-colors bg-white text-[15px] md:text-[16px] text-[#404145] font-medium leading-relaxed shadow-sm resize-none"
+                    />
+                  </div>
+                </motion.div>
+              )}
+
+              {currentStep === "lead_description" && (
+                <motion.div
+                  key="lead_description"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="w-full max-w-[600px] mt-2 md:mt-20"
+                >
+                  <h2 className="text-[22px] md:text-[40px] font-black text-[#222325] tracking-tight leading-tight mb-2 md:mb-4">
+                    What opportunities do you offer?
+                  </h2>
+                  <p className="text-[14px] md:text-[18px] text-[#62646a] mb-4 md:mb-10 font-medium">
+                    Describe seekers so referrers know what to look for.
+                  </p>
+                  <div className="w-full">
+                    <textarea
+                      value={businessData.serviceFocus}
+                      onChange={(e) =>
+                        setBusinessData({
+                          ...businessData,
+                          serviceFocus: e.target.value,
+                        })
+                      }
+                      placeholder="e.g. We are looking for mid-market manufacturing leads with automation needs..."
+                      className="w-full h-32 md:h-48 px-4 py-3 border border-[#e4e5e7] rounded-[4px] focus:outline-none focus:border-[#1dbf73] transition-colors bg-white text-[15px] md:text-[16px] text-[#404145] font-medium leading-relaxed shadow-sm resize-none"
+                    />
+                  </div>
+                </motion.div>
+              )}
+
+              {currentStep === "needs_website" && (
                 <motion.div
                   key="needs_website"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-8"
+                  className="w-full max-w-[600px] mt-2 md:mt-20"
                 >
-                  <div className="text-center max-w-lg mx-auto">
-                    <h2 className="text-3xl font-bold mb-3 tracking-tight text-[#001e00]">Do you need a website?</h2>
-                    <p className="text-slate-500 text-[15px]">We can help you set up a professional presence or integrate with your existing one.</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl mx-auto">
-                    <button 
-                      onClick={() => setBusinessData({...businessData, needsWebsite: true})}
-                      className={`p-8 rounded-xl border-2 text-left transition-all group ${
-                        businessData.needsWebsite === true ? 'border-[#1dbf73] bg-[#1dbf73]/5' : 'border-slate-100 hover:border-slate-200'
-                      }`}
+                  <h2 className="text-[22px] md:text-[40px] font-black text-[#222325] tracking-tight leading-tight mb-2 md:mb-4">
+                    Do you need a website?
+                  </h2>
+                  <p className="text-[14px] md:text-[18px] text-[#62646a] mb-4 md:mb-10 font-medium">
+                    We can help you set up professional presence.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
+                    <label
+                      onClick={() =>
+                        setBusinessData({ ...businessData, needsWebsite: true })
+                      }
+                      className={`group relative flex flex-col p-4 md:p-6 border border-[#e4e5e7] bg-white rounded-[4px] cursor-pointer hover:border-[#1dbf73] transition-all duration-200 ${businessData.needsWebsite === true ? "border-[#1dbf73] ring-1 ring-[#1dbf73] bg-[#fafafa]" : ""}`}
                     >
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors ${
-                        businessData.needsWebsite === true ? 'bg-[#1dbf73] text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'
-                      }`}>
-                        <Globe size={24} />
+                      <div className="absolute top-4 right-4 md:top-6 md:right-6 w-5 h-5 rounded-full border border-[#c5c6c9] group-has-[:checked]:border-[#1dbf73] group-has-[:checked]:bg-[#1dbf73] flex items-center justify-center transition-colors">
+                        {businessData.needsWebsite === true && (
+                          <div className="w-5 h-5 rounded-full bg-[#1dbf73] flex items-center justify-center">
+                            <svg
+                              className="w-3 h-3 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="3"
+                                d="M5 13l4 4L19 7"
+                              ></path>
+                            </svg>
+                          </div>
+                        )}
                       </div>
-                      <h3 className="font-bold text-lg mb-1">Yes, I need one</h3>
-                      <p className="text-sm text-slate-500">I want to create a new professional website for my business.</p>
-                    </button>
+                      <div className="mb-4 md:mb-6">
+                        <Globe
+                          className={`w-7 h-7 md:w-8 md:h-8 text-[#b5b6ba] ${businessData.needsWebsite === true ? "text-[#1dbf73]" : ""} group-hover:text-[#1dbf73] transition-colors`}
+                          strokeWidth={2}
+                        />
+                      </div>
+                      <span className="font-bold text-[16px] md:text-[18px] text-[#404145] leading-snug mb-1 md:mb-2">
+                        Yes, I need one
+                      </span>
+                      <span className="text-[12px] md:text-[14px] text-[#62646a] font-medium leading-snug">
+                        Create a and launch a professional landing page.
+                      </span>
+                    </label>
 
-                    <button 
-                      onClick={() => setBusinessData({...businessData, needsWebsite: false})}
-                      className={`p-8 rounded-xl border-2 text-left transition-all group ${
-                        businessData.needsWebsite === false ? 'border-[#1dbf73] bg-[#1dbf73]/5' : 'border-slate-100 hover:border-slate-200'
-                      }`}
+                    <label
+                      onClick={() =>
+                        setBusinessData({
+                          ...businessData,
+                          needsWebsite: false,
+                        })
+                      }
+                      className={`group relative flex flex-col p-4 md:p-6 border border-[#e4e5e7] bg-white rounded-[4px] cursor-pointer hover:border-[#1dbf73] transition-all duration-200 ${businessData.needsWebsite === false ? "border-[#1dbf73] ring-1 ring-[#1dbf73] bg-[#fafafa]" : ""}`}
                     >
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors ${
-                        businessData.needsWebsite === false ? 'bg-[#1dbf73] text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'
-                      }`}>
-                        <Layout size={24} />
+                      <div className="absolute top-4 right-4 md:top-6 md:right-6 w-5 h-5 rounded-full border border-[#c5c6c9] flex items-center justify-center transition-colors">
+                        {businessData.needsWebsite === false && (
+                          <div className="w-5 h-5 rounded-full bg-[#1dbf73] flex items-center justify-center">
+                            <svg
+                              className="w-3 h-3 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="3"
+                                d="M5 13l4 4L19 7"
+                              ></path>
+                            </svg>
+                          </div>
+                        )}
                       </div>
-                      <h3 className="font-bold text-lg mb-1">No, I have one</h3>
-                      <p className="text-sm text-slate-500">I already have a website and want to link it to my profile.</p>
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {currentStep === 'website_about' && (
-                <motion.div
-                  key="website_about"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-8"
-                >
-                  <div className="text-center max-w-lg mx-auto">
-                    <h2 className="text-3xl font-bold mb-3 tracking-tight text-[#001e00]">First, what is your site all about?</h2>
-                    <p className="text-slate-500 text-[15px]">Briefly describe the main focus of your business or project.</p>
-                  </div>
-
-                  <div className="max-w-md mx-auto space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-[#404145]">Site Category/Focus</label>
-                        <input 
-                            type="text" 
-                            value={businessData.siteAbout}
-                            onChange={(e) => setBusinessData({...businessData, siteAbout: e.target.value})}
-                            className="w-full h-12 px-4 border border-slate-300 rounded focus:outline-none focus:border-[#1dbf73] transition-all"
-                            placeholder="e.g. Graphic Design Studio, Online Bakery, Tech Blog"
+                      <div className="mb-4 md:mb-6">
+                        <Layout
+                          className={`w-7 h-7 md:w-8 md:h-8 text-[#b5b6ba] ${businessData.needsWebsite === false ? "text-[#1dbf73]" : ""} group-hover:text-[#1dbf73] transition-colors`}
+                          strokeWidth={2}
                         />
-                        <p className="text-xs text-slate-400">This helps us suggest the best features for your site.</p>
-                    </div>
+                      </div>
+                      <span className="font-bold text-[16px] md:text-[18px] text-[#404145] leading-snug mb-1 md:mb-2">
+                        No, I have one
+                      </span>
+                      <span className="text-[12px] md:text-[14px] text-[#62646a] font-medium leading-snug">
+                        Connect your current domain to Referr.
+                      </span>
+                    </label>
                   </div>
                 </motion.div>
               )}
 
-              {currentStep === 'website_name' && (
-                <motion.div
-                  key="website_name"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-8"
-                >
-                  <div className="text-center max-w-lg mx-auto">
-                    <h2 className="text-3xl font-bold mb-3 tracking-tight text-[#001e00]">What do you want to call your site?</h2>
-                    <p className="text-slate-500 text-[15px]">Choose a catchy name for your professional online presence.</p>
-                  </div>
-
-                  <div className="max-w-md mx-auto space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-[#404145]">Site Name</label>
-                        <input 
-                            type="text" 
-                            value={businessData.siteName}
-                            onChange={(e) => setBusinessData({...businessData, siteName: e.target.value})}
-                            className="w-full h-12 px-4 border border-slate-300 rounded focus:outline-none focus:border-[#1dbf73] transition-all"
-                            placeholder="e.g. Acme Creative Studio"
-                        />
-                        <p className="text-xs text-slate-400">You can always change this later in your settings.</p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {currentStep === 'website_description' && (
-                <motion.div
-                  key="website_description"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-8"
-                >
-                  <div className="text-center max-w-lg mx-auto">
-                    <h2 className="text-3xl font-bold mb-3 tracking-tight text-[#001e00]">Describe your vision</h2>
-                    <p className="text-slate-500 text-[15px]">The more detail you provide, the better we can match you with the right creators.</p>
-                  </div>
-
-                  <div className="max-w-2xl mx-auto">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-[#404145]">What should your website achieve?</label>
-                        <textarea 
-                            rows={6}
-                            value={businessData.websiteDescription}
-                            onChange={(e) => setBusinessData({...businessData, websiteDescription: e.target.value})}
-                            placeholder="e.g. We need a clean, minimalist portfolio that showcases our architecture projects. Key features: high-res gallery, client testimonial section, and a contact form..." 
-                            className="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1dbf73] transition-all resize-none text-[15px] leading-relaxed shadow-sm"
-                        ></textarea>
-                        <div className="flex justify-between items-center mt-2 px-1">
-                            <p className="text-xs text-slate-400 italic">Think about: pages needed, style, or specific apps/integrations.</p>
-                            <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">{businessData.websiteDescription.length} chars</span>
-                        </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {currentStep === 'website_url' && (
-                <motion.div
-                  key="website_url"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-8"
-                >
-                  <div className="text-center max-w-lg mx-auto">
-                    <h2 className="text-3xl font-bold mb-3 tracking-tight text-[#001e00]">Share your website</h2>
-                    <p className="text-slate-500 text-[15px]">We'll use this to help our referrers understand your business better.</p>
-                  </div>
-
-                  <div className="max-w-md mx-auto space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-[#404145]">Website URL</label>
-                        <div className="flex">
-                            <span className="h-12 px-3 border border-r-0 border-slate-300 rounded-l flex items-center bg-slate-50 text-slate-400 text-sm">https://</span>
-                            <input 
-                                type="text" 
-                                value={businessData.website}
-                                onChange={(e) => setBusinessData({...businessData, website: e.target.value})}
-                                className="flex-1 h-12 px-4 border border-slate-300 rounded-r focus:outline-none focus:border-[#1dbf73] transition-all"
-                                placeholder="www.yourcompany.com"
-                            />
-                        </div>
-                        <p className="text-xs text-slate-400">This will be featured on your partner profile.</p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {currentStep === 'final' && (
-                <motion.div
-                  key="final"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-8 py-4"
-                >
-                  <div className="text-center max-w-lg mx-auto">
-                    <div className="w-20 h-20 bg-[#1dbf73]/10 text-[#1dbf73] rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Briefcase size={40} />
-                    </div>
-                    <h2 className="text-3xl font-bold mb-3 tracking-tight">Ready to launch</h2>
-                    <p className="text-slate-500 text-[15px]">Review your details before jumping into your new dashboard.</p>
-                  </div>
-
-                  <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                     <h4 className="font-bold text-sm text-slate-400 uppercase tracking-widest mb-4">Summary</h4>
-                     <div className="space-y-3">
-                         <div className="flex justify-between items-center text-[15px]">
-                            <span className="text-slate-500">Business</span>
-                            <span className="font-bold">{businessData.name}</span>
-                         </div>
-                         <div className="flex justify-between items-center text-[15px]">
-                            <span className="text-slate-500">Industry</span>
-                            <span className="font-bold">{businessData.industry}</span>
-                         </div>
-                         {businessData.needsWebsite && (
-                            <div className="flex justify-between items-center text-[15px]">
-                                <span className="text-slate-500">Site Name</span>
-                                <span className="font-bold">{businessData.siteName}</span>
-                            </div>
-                         )}
-                     </div>
-                  </div>
-                </motion.div>
-              )}
-                </>
-              )}
+              {/* ... Website Steps Removed ... */}
             </AnimatePresence>
-
-            {!loading && (
-              <div className="mt-12 flex items-center justify-between pt-8 border-t border-slate-100">
-                <button 
-                  onClick={handleBack}
-                  disabled={currentStep === 'identity'}
-                  className={`flex items-center gap-2 font-bold px-4 py-2 transition-all ${
-                      currentStep === 'identity' ? 'opacity-0 pointer-events-none' : 'text-slate-400 hover:text-[#222325]'
-                  }`}
-                >
-                  <ChevronLeft size={20} />
-                  Back
-                </button>
-
-                <button 
-                  onClick={currentStep === 'final' ? handleComplete : handleNext}
-                  className="bg-[#1dbf73] text-white px-8 py-3 rounded font-bold hover:bg-[#19a463] transition-all flex items-center gap-2"
-                >
-                  {currentStep === 'final' ? 'Launch Dashboard' : 'Next Step'}
-                  {currentStep !== 'final' && <ChevronRight size={20} />}
-                </button>
-              </div>
-            )}
           </div>
-        </div>
-      </main>
+        </main>
+
+        <footer className="w-full bg-white border-t border-[#e4e5e7] py-4 md:py-6 px-6 lg:px-12 flex-shrink-0 z-10">
+          <div className="max-w-5xl mx-auto flex justify-between items-center gap-4">
+            <button
+              onClick={handleBack}
+              className={`font-black text-[15px] md:text-[16px] uppercase tracking-widest px-6 py-3.5 rounded-[4px] transition-colors ${currentStep !== "identity" ? "text-[#62646a] hover:bg-[#f5f5f5] cursor-pointer" : "text-[#c5c6c9] pointer-events-none opacity-0"}`}
+            >
+              Back
+            </button>
+            <button
+              onClick={
+                currentStep !== "needs_website" ? handleNext : handleComplete
+              }
+              disabled={isNextDisabled()}
+              className={`flex-1 md:flex-none px-8 py-3.5 text-white font-black text-[15px] md:text-[16px] uppercase tracking-widest rounded-[4px] shadow-md transition-all active:scale-[0.98] ${
+                isNextDisabled()
+                  ? "bg-[#1dbf73] opacity-30 cursor-not-allowed"
+                  : "bg-[#1dbf73] hover:bg-[#19a463] cursor-pointer"
+              }`}
+            >
+              {currentStep === "needs_website" ? "Finish" : "Next"}
+            </button>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }

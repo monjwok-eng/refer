@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user in the system.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "userType": { "type": "string" }
+      },
+      "required": ["userId", "email", "userType"]
+    },
+    "Favorite": {
+      "title": "Favorite",
+      "description": "A business-hustler favorite relationship.",
+      "type": "object",
+      "properties": {
+        "businessId": { "type": "string" },
+        "hustlerId": { "type": "string" }
+      },
+      "required": ["businessId", "hustlerId"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "A notification sent to a hustler.",
+      "type": "object",
+      "properties": {
+        "hustlerId": { "type": "string" },
+        "message": { "type": "string" },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["hustlerId", "message", "read", "createdAt"]
+    },
+    "Deal": {
+        "title": "Deal",
+        "description": "A deal posted by a business.",
+        "type": "object",
+        "properties": {
+            "businessId": { "type": "string" },
+            "dealId": { "type": "string" },
+            "title": { "type": "string" },
+            "description": { "type": "string" }
+        },
+        "required": ["businessId", "dealId", "title", "description"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "User" },
+      "description": "Users collection."
+    },
+    "/favorites/{favoriteId}": {
+      "schema": { "$ref": "Favorite" },
+      "description": "Favorites collection."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "Notification" },
+      "description": "Notifications collection."
+    },
+    "/deals/{dealId}": {
+      "schema": { "$ref": "Deal" },
+      "description": "Deals collection."
+    }
+  }
+}

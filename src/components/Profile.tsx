@@ -1,130 +1,169 @@
-import SidebarLayout from './SidebarLayout';
-import { motion } from 'motion/react';
-import { User, Mail, MapPin, Calendar, Camera, Edit2 } from 'lucide-react';
+import { motion } from "motion/react";
+import { 
+  User, 
+  Settings, 
+  HelpCircle, 
+  LogOut, 
+  DollarSign,
+  Smartphone,
+  ChevronRight, 
+  Copy, 
+  Award, 
+  Users, 
+  HandCoins, 
+  CheckCircle2, 
+  Phone, 
+  Calendar,
+  Shield,
+  Bell,
+  CreditCard,
+  MessageSquare,
+  RefreshCw,
+  PieChart,
+  QrCode,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../services/authService";
 
 export default function Profile() {
-  const name = localStorage.getItem('hustlerName') || 'Hustler';
-  const firstName = name.split(' ')[0];
+  const navigate = useNavigate();
+  const userType = localStorage.getItem("userType") || "hustler";
+  const name = userType === "business"
+    ? localStorage.getItem("businessName") || "Business"
+    : localStorage.getItem("hustlerName") || "Hustler";
+  const userPicture = localStorage.getItem("userPicture") || "https://images-wixmp-7ef3383b5fd80a9f5a5cc686.wixmp.com/27765ee8-82b7-404f-91cd-a507b11093a6/1741463568052/v1/fill/w_320,h_320/file.jpg";
+  const referralCode = localStorage.getItem("userEmail")
+    ? localStorage.getItem("userEmail")?.split("@")[0].toUpperCase()
+    : "MOSES2026";
+
+  const profileStats = [
+    { label: "My Referrals", value: "0", icon: Users },
+    { label: "Avg. Commission", value: "0%", icon: DollarSign },
+    { label: "Top Rank", value: "N/A", icon: Award },
+    { label: "Success Rate", value: "0%", icon: CheckCircle2 },
+  ];
+
+  const sections = [
+    {
+      title: "Settings",
+      items: [
+        { label: "Personal Information", icon: User, desc: "Name, email, and social links" },
+        { label: "Account Security", icon: Shield, desc: "Password and two-factor auth" },
+        { label: "Phone & Identity", icon: Smartphone, desc: "Verified phone number" },
+        { label: "Notifications", icon: Bell, desc: "Email and push alerts" },
+      ]
+    },
+    {
+      title: "Resources",
+      items: [
+        { label: "Referral Guidelines", icon: MessageSquare, desc: "How to earn more" },
+        { label: "Help & Support", icon: HelpCircle, desc: "Contact our team" },
+        { label: "Terms of Service", icon: CreditCard, desc: "Read the legal stuff" },
+      ]
+    }
+  ];
 
   return (
-    <SidebarLayout title="Profile">
-      <div className="mb-10">
-        <h1 className="text-[32px] font-bold tracking-tight mb-2">My Profile</h1>
-        <p className="text-[#62646a] text-lg font-light">Manage your public presence and account details.</p>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Profile Card */}
-        <div className="xl:col-span-1">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl border border-[#e4e5e7] shadow-sm overflow-hidden"
-          >
-            <div className="p-8 flex flex-col items-center text-center">
-              <div className="relative mb-6">
-                <div className="w-24 h-24 rounded-full bg-[#1dbf73] flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                  {firstName[0]}
-                </div>
-                <button className="absolute bottom-0 right-0 p-2 bg-white rounded-full border border-[#e4e5e7] shadow-sm hover:bg-gray-50 transition-colors text-[#62646a]">
-                  <Camera size={14} />
+    <div className="min-h-screen bg-[#f7f7f7] pb-24 md:pb-12 text-[#404145]">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 pt-8 space-y-8 text-left">
+        {/* Profile Header */}
+        <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm text-left">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="relative">
+              <div className="w-32 h-32 rounded-full overflow-hidden border border-gray-100">
+                <img 
+                  src={userPicture} 
+                  alt={name} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            
+            <div className="flex-1 space-y-4 text-center md:text-left">
+              <div>
+                <h1 className="text-3xl font-bold text-[#222325]">{name}</h1>
+                <p className="text-[#62646a]">Senior Referrer • Based in Kampala, Uganda</p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                <button className="px-6 py-2 bg-[#222325] text-white rounded font-bold text-sm hover:bg-black transition-all">
+                  Edit Profile
+                </button>
+                <button className="px-6 py-2 border border-gray-300 text-[#404145] rounded font-bold text-sm hover:bg-gray-50 transition-all">
+                  View Public Page
                 </button>
               </div>
-              <h2 className="text-xl font-bold mb-1">{name}</h2>
-              <p className="text-[#62646a] text-[15px] mb-4">Level 2 Seller • Referral Expert</p>
-              
-              <button className="w-full py-2.5 px-4 rounded border border-[#222325] font-bold text-[14px] hover:bg-gray-50 transition-all mb-8">
-                Preview Public Profile
-              </button>
-
-              <div className="w-full pt-6 border-t border-[#f1f1f1] space-y-4 text-left">
-                <div className="flex items-center justify-between text-[14px]">
-                  <div className="flex items-center gap-2 text-[#62646a]">
-                    <MapPin size={16} />
-                    <span>From</span>
-                  </div>
-                  <span className="font-bold">United States</span>
-                </div>
-                <div className="flex items-center justify-between text-[14px]">
-                  <div className="flex items-center gap-2 text-[#62646a]">
-                    <User size={16} />
-                    <span>Member since</span>
-                  </div>
-                  <span className="font-bold">May 2024</span>
-                </div>
-                <div className="flex items-center justify-between text-[14px]">
-                  <div className="flex items-center gap-2 text-[#62646a]">
-                    <Calendar size={16} />
-                    <span>Last Active</span>
-                  </div>
-                  <span className="font-bold">Just now</span>
-                </div>
-              </div>
             </div>
-          </motion.div>
 
-          <div className="mt-8 bg-white rounded-xl border border-[#e4e5e7] p-8 shadow-sm">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-bold">Description</h3>
-              <button className="text-[#1dbf73] font-bold text-[14px] hover:underline">Edit</button>
+            <div className="bg-gray-50 border border-gray-100 rounded-lg p-6 w-full md:w-auto">
+               <p className="text-xs font-bold text-[#74767e] uppercase tracking-wider mb-2">Personal Invite</p>
+               <div className="flex items-center gap-3">
+                 <code className="text-lg font-bold text-[#222325]">{referralCode}</code>
+                 <button 
+                  onClick={() => navigator.clipboard.writeText(referralCode)}
+                  className="p-2 text-[#1dbf73] hover:bg-[#1dbf73]/10 rounded transition-colors"
+                 >
+                   <Copy size={18} />
+                 </button>
+               </div>
             </div>
-            <p className="text-[#62646a] text-[15px] font-light italic">
-              "Professional connector specializing in B2B sales and high-level networking. Helping businesses find the right partners through verified referrals."
-            </p>
           </div>
         </div>
 
-        {/* Account Settings / Info */}
-        <div className="xl:col-span-2 space-y-8">
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-white rounded-xl border border-[#e4e5e7] shadow-sm"
-          >
-            <div className="px-8 py-6 border-b border-[#e4e5e7] flex justify-between items-center">
-              <h3 className="font-bold text-lg">Account Information</h3>
-              <button className="flex items-center gap-2 text-[#1dbf73] font-bold text-[14px]">
-                <Edit2 size={14} /> Edit Info
-              </button>
-            </div>
-            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-1">
-                <label className="text-[13px] font-bold text-[#b5b6ba] uppercase tracking-wider">Full Name</label>
-                <div className="flex items-center gap-3 p-3 bg-gray-50/50 border border-[#e4e5e7] rounded-lg">
-                  <User size={18} className="text-[#74767e]" />
-                  <span className="text-[15px]">{name}</span>
-                </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          {profileStats.map((stat) => (
+            <div key={stat.label} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-4 text-[#95979d]">
+                <stat.icon size={18} />
+                <span className="text-xs font-bold uppercase tracking-wider">{stat.label}</span>
               </div>
-              <div className="space-y-1">
-                <label className="text-[13px] font-bold text-[#b5b6ba] uppercase tracking-wider">Email Address</label>
-                <div className="flex items-center gap-3 p-3 bg-gray-50/50 border border-[#e4e5e7] rounded-lg">
-                  <Mail size={18} className="text-[#74767e]" />
-                  <span className="text-[15px]">user@example.com</span>
-                </div>
-              </div>
-              {/* More fields can be added here */}
+              <div className="text-3xl font-bold text-[#222325]">{stat.value}</div>
             </div>
-          </motion.div>
+          ))}
+        </div>
 
-          <div className="bg-white rounded-xl border border-[#e4e5e7] shadow-sm">
-            <div className="px-8 py-6 border-b border-[#e4e5e7]">
-              <h3 className="font-bold text-lg">Skills & Certifications</h3>
-            </div>
-            <div className="p-8">
-              <div className="flex flex-wrap gap-2">
-                {['Networking', 'Lead Gen', 'B2B Sales', 'Referral Strategy', 'Negotiation'].map(skill => (
-                  <span key={skill} className="px-4 py-1.5 bg-gray-100 text-[#62646a] rounded-full text-[13px] font-medium border border-transparent hover:border-[#1dbf73] hover:text-[#1dbf73] cursor-default transition-all">
-                    {skill}
-                  </span>
+        {/* Settings Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {sections.map((section) => (
+            <div key={section.title} className="space-y-4">
+              <h3 className="text-xl font-bold text-[#222325] px-2">{section.title}</h3>
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-100">
+                {section.items.map((item) => (
+                  <button 
+                    key={item.label}
+                    className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 bg-gray-50 rounded flex items-center justify-center text-[#95979d] group-hover:text-[#1dbf73] border border-gray-100 transition-colors">
+                        <item.icon size={22} />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-base font-bold text-[#404145]">{item.label}</p>
+                        <p className="text-sm text-[#62646a]">{item.desc}</p>
+                      </div>
+                    </div>
+                    <ChevronRight size={20} className="text-gray-300 group-hover:text-[#222325] transition-colors" />
+                  </button>
                 ))}
-                <button className="px-4 py-1.5 border border-dashed border-[#b5b6ba] text-[#b5b6ba] rounded-full text-[13px] font-medium hover:border-[#1dbf73] hover:text-[#1dbf73] transition-all">
-                  + Add New
-                </button>
               </div>
             </div>
-          </div>
+          ))}
+        </div>
+
+        {/* Logout */}
+        <div className="pt-8 text-center pb-20">
+          <button 
+            type="button"
+            onClick={async () => {
+              await logout();
+              navigate("/signin");
+            }}
+            className="flex items-center gap-2 mx-auto text-rose-600 font-bold hover:underline cursor-pointer"
+          >
+            <LogOut size={18} /> Log out from Referr
+          </button>
         </div>
       </div>
-    </SidebarLayout>
+    </div>
   );
 }

@@ -1,128 +1,220 @@
-import SidebarLayout from './SidebarLayout';
-import { motion } from 'motion/react';
-import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, History } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import {
+  Wallet as WalletIcon,
+  Smartphone,
+  ChevronRight,
+  TrendingUp,
+  Calendar,
+  CheckCircle2,
+  ArrowUpRight,
+  ArrowDownLeft,
+  ArrowLeft,
+  MoreVertical,
+  Plus,
+  CreditCard,
+  Building2,
+  QrCode,
+  History,
+  ArrowUp,
+  ArrowDown,
+  RefreshCw,
+  PieChart as PieChartIcon,
+  User as UserIcon,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
-export default function Wallet() {
-  const transactions = [
-    { id: 1, type: 'Income', client: 'Alex Rivera', amount: '+$45.00', date: 'May 12, 2024', status: 'Completed' },
-    { id: 2, type: 'Income', client: 'Marcus Thorne', amount: '+$80.00', date: 'May 10, 2024', status: 'Completed' },
-    { id: 3, type: 'Withdraw', client: 'Bank Transfer', amount: '-$200.00', date: 'May 08, 2024', status: 'Processing' },
-    { id: 4, type: 'Income', client: 'Sarah Chen', amount: '+$120.00', date: 'May 05, 2024', status: 'Completed' },
-  ];
+export default function Wallet({ userType: initialUserType }: { userType?: "hustler" | "business" }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const userType = initialUserType || (localStorage.getItem("userType") as "hustler" | "business") || "hustler";
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const transactions: any[] = [];
+
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-[#f7f7f7]">
+      <div className="w-10 h-10 border-4 border-[#1dbf73] border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
   return (
-    <SidebarLayout title="Earnings">
-      <div className="mb-10">
-        <h1 className="text-[32px] font-bold tracking-tight mb-2">Earnings</h1>
-        <p className="text-[#62646a] text-lg font-light">Manage your balance and track your referral income.</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
-        {/* Main Balance Card */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="lg:col-span-2 bg-gradient-to-br from-[#1dbf73] to-[#19a463] p-10 rounded-2xl text-white shadow-lg relative overflow-hidden"
-        >
-          <div className="relative z-10">
-            <h2 className="text-[14px] font-bold uppercase tracking-wider opacity-80 mb-2">Available Balance</h2>
-            <div className="flex items-baseline gap-2 mb-8">
-              <span className="text-5xl font-extrabold tracking-tight">$450.00</span>
-              <span className="text-xl opacity-80">USD</span>
+    <div className="min-h-screen bg-[#f7f7f7] pb-24 md:pb-12 text-[#404145]">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 pt-8 space-y-8 text-left">
+        {/* Fiverr-Style Header */}
+        <header className="flex flex-col gap-6 text-left">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-1 text-left">
+              <h1 className="text-3xl md:text-4xl font-bold text-[#222325] tracking-tight">
+                Earnings & Wallet
+              </h1>
+              <p className="text-[#62646a] text-lg">Manage your referrals, payouts, and financial growth.</p>
             </div>
-            
-            <div className="flex gap-4">
-              <button 
-                onClick={() => alert('Withdrawal request initiated!')}
-                className="bg-white text-[#1dbf73] px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition-all shadow-sm"
-              >
+            <div className="flex items-center gap-3">
+              <button className="px-6 py-3 bg-[#222325] text-white rounded font-bold text-sm hover:bg-black transition-all">
                 Withdraw Funds
               </button>
-              <button className="bg-black/10 backdrop-blur text-white border border-white/20 px-8 py-3 rounded-full font-bold hover:bg-white/10 transition-all">
-                Manage Payouts
-              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Balance Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm flex flex-col justify-between h-[180px]">
+             <div>
+               <p className="text-sm font-bold text-[#62646a] mb-1">Total Balance</p>
+               <h2 className="text-4xl font-bold text-[#222325]">UGX 0</h2>
+             </div>
+             <p className="text-xs text-[#95979d]">Available for withdrawal</p>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm flex flex-col justify-between h-[180px]">
+             <div>
+               <p className="text-sm font-bold text-[#62646a] mb-1">Pending Clearance</p>
+               <h2 className="text-4xl font-bold text-[#222325] text-[#1dbf73]">UGX 0</h2>
+             </div>
+             <p className="text-xs text-[#95979d]">Expected in 14 days</p>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm flex flex-col justify-between h-[180px]">
+             <div>
+               <p className="text-sm font-bold text-[#62646a] mb-1">Personal Balance</p>
+               <h2 className="text-4xl font-bold text-[#222325]">UGX 0</h2>
+             </div>
+             {userType !== 'hustler' && (
+               <p className="text-xs text-[#1dbf73] font-black underline cursor-pointer">Top up</p>
+             )}
+          </div>
+        </div>
+
+        {/* Transactions Table */}
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden text-left">
+          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+            <h3 className="text-lg font-bold text-[#222325]">Financial Activity</h3>
+            <div className="flex items-center gap-2">
+              <select className="bg-white border border-gray-300 rounded px-3 py-1.5 text-sm font-medium focus:outline-none focus:border-[#1dbf73]">
+                <option>Everything</option>
+                <option>Cleared</option>
+                <option>Pending</option>
+                <option>Withdrawals</option>
+              </select>
             </div>
           </div>
           
-          <WalletIcon 
-            size={200} 
-            className="absolute -right-10 -bottom-10 opacity-10 rotate-12" 
-            strokeWidth={1}
-          />
-        </motion.div>
-
-        {/* Quick Stats */}
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-xl border border-[#e4e5e7] shadow-sm">
-            <div className="flex items-center gap-4 mb-2 text-[#62646a]">
-              <ArrowUpRight size={18} className="text-[#1dbf73]" />
-              <span className="text-[14px] font-medium">Total Earned</span>
-            </div>
-            <p className="text-3xl font-bold text-[#222325]">$3,840.50</p>
-          </div>
-          <div className="bg-white p-6 rounded-xl border border-[#e4e5e7] shadow-sm">
-            <div className="flex items-center gap-4 mb-2 text-[#62646a]">
-              <History size={18} className="text-blue-500" />
-              <span className="text-[14px] font-medium">Pending Clearance</span>
-            </div>
-            <p className="text-3xl font-bold text-[#222325]">$145.00</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Transaction History */}
-      <div className="bg-white rounded-xl border border-[#e4e5e7] shadow-sm overflow-hidden">
-        <div className="px-8 py-6 border-b border-[#e4e5e7] flex items-center justify-between">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <History size={20} className="text-[#b5b6ba]" />
-            Transaction History
-          </h2>
-          <button className="text-[14px] font-bold text-[#1dbf73] hover:underline">Download CSV</button>
-        </div>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="text-[13px] text-[#b5b6ba] uppercase tracking-wider bg-[#fafafa]">
-              <tr>
-                <th className="px-8 py-4 font-bold">Transaction</th>
-                <th className="px-8 py-4 font-bold">Date</th>
-                <th className="px-8 py-4 font-bold">Amount</th>
-                <th className="px-8 py-4 font-bold">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#e4e5e7]">
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-8 py-5">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        tx.type === 'Income' ? 'bg-green-50 text-[#1dbf73]' : 'bg-red-50 text-red-500'
-                      }`}>
-                        {tx.type === 'Income' ? <ArrowDownLeft size={16} /> : <ArrowUpRight size={16} />}
-                      </div>
-                      <div>
-                        <p className="font-bold text-[15px]">{tx.type}</p>
-                        <p className="text-[12px] text-[#62646a]">{tx.client}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-5 text-[14px] text-[#222325]">{tx.date}</td>
-                  <td className={`px-8 py-5 font-bold ${tx.type === 'Income' ? 'text-[#1dbf73]' : 'text-red-500'}`}>
-                    {tx.amount}
-                  </td>
-                  <td className="px-8 py-5">
-                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide ${
-                      tx.status === 'Completed' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'
-                    }`}>
-                      {tx.status}
-                    </span>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-gray-50/50 border-b border-gray-100 text-[12px] font-bold text-[#74767e] uppercase tracking-wider">
+                  <th className="px-6 py-4">Date</th>
+                  <th className="px-6 py-4">Activity</th>
+                  <th className="px-6 py-4">Business</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {transactions.length > 0 ? transactions.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 text-sm text-[#74767e]">{tx.time}</td>
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-bold text-[#404145]">{tx.name}</p>
+                      <p className="text-[12px] text-[#95979d]">{tx.type}</p>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-[#404145]">{tx.business}</td>
+                    <td className="px-6 py-4">
+                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-tight ${
+                         tx.status === 'Cleared' || tx.status === 'Completed' 
+                          ? 'bg-[#1dbf73]/10 text-[#1dbf73]' 
+                          : 'bg-orange-100 text-orange-600'
+                       }`}>
+                         {tx.status}
+                       </span>
+                    </td>
+                    <td className={`px-6 py-4 text-sm font-bold text-right ${tx.isPositive ? 'text-[#1dbf73]' : 'text-[#404145]'}`}>
+                      {tx.amount}
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-20 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <History className="text-gray-200" size={48} />
+                        <p className="text-[#62646a] font-medium">No transactions found</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="p-6 border-t border-gray-100 bg-gray-50/30 text-center">
+            <button className="text-sm font-bold text-[#1dbf73] hover:underline">
+              View full financial statement
+            </button>
+          </div>
+        </div>
+
+        {/* Payout Methods */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
+             <h3 className="text-lg font-bold text-[#222325] mb-6">Withdrawal Method</h3>
+             
+             <div className="space-y-3">
+               <div className="flex items-center justify-between p-4 border border-gray-200 rounded hover:border-[#1dbf73] transition-colors cursor-pointer group">
+                 <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-[#ffcc00]/10 rounded flex items-center justify-center overflow-hidden p-2">
+                     <img src="https://www.mtn.co.ug/wp-content/themes/mtn-vivid-wp/public/img/mtn-logo.svg" alt="MTN" className="w-full h-full object-contain" />
+                   </div>
+                   <div>
+                     <p className="font-bold text-[#404145]">MTN Mobile Money</p>
+                     <p className="text-xs text-[#95979d]">Ending in ****4590</p>
+                   </div>
+                 </div>
+                 <button className="text-[12px] font-bold text-[#1dbf73] group-hover:underline">Edit</button>
+               </div>
+
+               <div className="flex items-center justify-between p-4 border border-gray-200 rounded hover:border-[#1dbf73] transition-colors cursor-pointer group">
+                 <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-red-50 rounded flex items-center justify-center overflow-hidden p-2">
+                     <img src="https://upload.wikimedia.org/wikipedia/commons/f/fb/Bharti_Airtel_Logo.svg" alt="Airtel Uganda Logo" className="w-full h-full object-contain" />
+                   </div>
+                   <div>
+                     <p className="font-bold text-[#404145]">Airtel Money</p>
+                     <p className="text-xs text-[#95979d]">Ending in ****8821</p>
+                   </div>
+                 </div>
+                 <button className="text-[12px] font-bold text-[#1dbf73] group-hover:underline">Edit</button>
+               </div>
+             </div>
+
+             <button className="mt-6 flex items-center gap-2 text-sm font-bold text-[#1dbf73] hover:underline">
+                <Plus size={16} /> Add a new withdrawal method
+             </button>
+           </div>
+
+           <div className="bg-[#1dbf73]/5 border border-[#1dbf73]/20 rounded-lg p-8 shadow-sm">
+             <h3 className="text-lg font-bold text-[#222325] mb-2">Need help?</h3>
+             <p className="text-sm text-[#62646a] mb-6">Learn more about how our payout system works and when you can expect your funds.</p>
+             <button className="px-6 py-2 border border-[#222325] text-[#222325] rounded font-bold text-sm hover:bg-[#222325] hover:text-white transition-all">
+               Visit Help Center
+             </button>
+           </div>
         </div>
       </div>
-    </SidebarLayout>
+    </div>
   );
+}
+
+function SimplePaypalIcon({ size, className }: { size: number, className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M7 17.5l.3-2.3H5.7l1-7.7h6.2c3.5 0 4.6 1.7 4.1 4.5-.4 3.1-2.4 4.5-5.3 4.5H9.3l-.6 4.5H7z" />
+    </svg>
+  );
+}
+
+function RefreshCwIcon({ size }: { size: number }) {
+  return <RefreshCw size={size} />;
 }
