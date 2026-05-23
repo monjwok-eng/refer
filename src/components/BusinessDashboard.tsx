@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getBusinessRatings } from "../utils/ratingStore";
 import {
   Users,
   Briefcase,
@@ -426,18 +425,6 @@ export default function BusinessDashboard() {
                   </div>
                 )}
               </div>
-
-              {/* Dynamic Brand Trust Ratio Indicator */}
-              {(() => {
-                const bName = localStorage.getItem("businessName") || "Aroma Coffee Roasters";
-                const bRatings = getBusinessRatings(bName);
-                return (
-                  <div className="flex items-center gap-1 text-slate-500 font-bold text-xs mb-3" id="business-star-dashboard-index">
-                    <Star size={12} className="fill-amber-400 text-amber-400" />
-                    <span className="text-slate-700">Brand Trust Score: {bRatings.averageRating} / 5.0 ({bRatings.totalReviews} reviews from advocates)</span>
-                  </div>
-                );
-              })()}
               <p className="text-[#62646a] text-[13px] md:text-[15px] mb-3 md:mb-4">
                 {hasSite
                   ? "Your site is live! Here's how your referrals are performing."

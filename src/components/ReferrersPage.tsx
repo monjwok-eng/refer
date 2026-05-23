@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Search, Filter, Heart, UserPlus, SlidersHorizontal, ShieldCheck, Calendar as CalendarIcon, Star, MessageSquare, CheckCircle2 } from "lucide-react";
+import { Search, Filter, Heart, UserPlus, SlidersHorizontal, ShieldCheck, Calendar as CalendarIcon } from "lucide-react";
 import { leaderboardData } from "./AnalyticsPage";
 import { Skeleton } from "./ui/Skeleton";
-import { getInfluencerRatings, addInfluencerReview } from "../utils/ratingStore";
 
 export default function ReferrersPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -13,13 +12,6 @@ export default function ReferrersPage() {
     const saved = localStorage.getItem("favorite_referrers");
     return saved ? JSON.parse(saved) : [];
   });
-
-  // Partner ratings states
-  const [activeRatingName, setActiveRatingName] = useState<string | null>(null);
-  const [formRating, setFormRating] = useState(5);
-  const [formComment, setFormComment] = useState("");
-  const [ratingSuccessName, setRatingSuccessName] = useState<string | null>(null);
-  const [triggerCount, setTriggerCount] = useState(0);
 
   const [allReferrers, setAllReferrers] = useState<any[]>([]);
 
@@ -175,13 +167,10 @@ export default function ReferrersPage() {
         ) : filteredReferrers.length > 0 ? (
           filteredReferrers.map((referrer) => {
             const isFav = favorites.includes(referrer.id);
-            const rData = getInfluencerRatings(referrer.name);
-            const isFormOpen = activeRatingName === referrer.name;
-
             return (
               <div
                 key={referrer.id}
-                className="bg-white border border-slate-200 hover:shadow-[4px_4px_0_0_#1dbf73] md:hover:shadow-[8px_8px_0_0_#1dbf73] hover:-translate-y-0.5 md:hover:-translate-y-1 md:hover:translate-x-1 transition-all group text-left flex flex-col justify-between"
+                className="bg-white border border-slate-200 hover:shadow-[4px_4px_0_0_#1dbf73] md:hover:shadow-[8px_8px_0_0_#1dbf73] hover:-translate-y-0.5 md:hover:-translate-y-1 md:hover:translate-x-1 transition-all group text-left"
               >
                 <div className="p-4 md:p-6 text-left">
                   <div className="flex items-start justify-between mb-4 md:mb-6 text-left">
@@ -195,16 +184,9 @@ export default function ReferrersPage() {
                         <h3 className="text-[15px] md:text-[16px] font-bold text-[#222325] text-left">
                           {referrer.name}
                         </h3>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-[#1dbf73] text-[10px] md:text-[11px] font-bold uppercase tracking-tight text-left">
-                            Top Tier Advocate
-                          </p>
-                          <span className="text-slate-300">|</span>
-                          <div className="flex items-center gap-0.5 text-amber-500 text-[11px] font-bold">
-                            <Star size={11} className="fill-amber-400 text-amber-400" />
-                            <span>{rData.averageRating} ({rData.totalReviews})</span>
-                          </div>
-                        </div>
+                        <p className="text-[#1dbf73] text-[11px] md:text-[12px] font-bold uppercase tracking-tight text-left">
+                          Top Tier
+                        </p>
                       </div>
                     </div>
                     <button
@@ -222,27 +204,27 @@ export default function ReferrersPage() {
                       <p className="text-[16px] md:text-[18px] font-bold text-[#222325] text-left">{(referrer as any).referrals}</p>
                     </div>
                     <div className="bg-slate-50 p-2.5 md:p-3 text-left">
-                      <p className="text-slate-400 text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-left">Contract Status</p>
+                      <p className="text-slate-400 text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-left">Status</p>
                       <div className="flex items-center gap-1.5 mt-0.5 text-left">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#1dbf73] text-left animate-pulse"></div>
-                        <p className="text-[12px] md:text-[14px] font-bold text-[#222325] text-left">Connected</p>
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#1dbf73] text-left"></div>
+                        <p className="text-[12px] md:text-[14px] font-bold text-[#222325] text-left">Active</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="border-t border-slate-100 pt-4 mb-4">
+                  <div className="border-t border-slate-100 pt-4 mb-4 md:mb-6">
                     <p className="text-slate-400 text-[10px] uppercase font-bold tracking-widest mb-3">Collaboration History</p>
                     <div className="space-y-2.5">
-                      <div className="flex items-center justify-between text-[11px] md:text-[12px]">
+                      <div className="flex items-center justify-between text-[12px]">
                         <div className="flex items-center gap-2 text-slate-500">
                           <CalendarIcon size={14} />
                           <span>Member since</span>
                         </div>
                         <span className="font-bold text-[#222325]">{(referrer as any).joinedDate}</span>
                       </div>
-                      <div className="flex items-center justify-between text-[11px] md:text-[12px]">
+                      <div className="flex items-center justify-between text-[12px]">
                         <div className="flex items-center gap-2 text-slate-500">
-                          <ShieldCheck size={14} className="text-[#157945]" />
+                          <ShieldCheck size={14} className="text-[#1dbf73]" />
                           <span>Reliability Score</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -256,104 +238,6 @@ export default function ReferrersPage() {
                         </div>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Testimonial / Review snippet */}
-                  {rData.reviews.length > 0 && (
-                    <div className="mt-3 bg-indigo-50/50 rounded-xl p-3 border border-indigo-100 text-left">
-                      <div className="flex items-center gap-1.5 mb-1 text-slate-700">
-                        <MessageSquare size={12} className="text-indigo-600" />
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-indigo-800">Latest Brand Feedback</span>
-                      </div>
-                      <p className="text-xs text-slate-600 italic">"{rData.reviews[rData.reviews.length - 1].comment}"</p>
-                      <span className="block text-[10px] font-bold text-slate-500 mt-1">— {rData.reviews[rData.reviews.length - 1].reviewerName}</span>
-                    </div>
-                  )}
-
-                  {/* Collapsible Rate Partner Section */}
-                  <div className="border-t border-slate-100 pt-4 mt-4">
-                    {!isFormOpen ? (
-                      <button
-                        onClick={() => {
-                          setActiveRatingName(referrer.name);
-                          setFormRating(5);
-                          setFormComment("");
-                        }}
-                        className="w-full bg-[#222325] hover:bg-black text-white text-xs font-bold py-2 rounded-xl transition-all cursor-pointer text-center"
-                      >
-                        Rate Advocate Performance
-                      </button>
-                    ) : (
-                      <div className="space-y-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-slate-700 uppercase">Rate reliability & quality</span>
-                          <button
-                            type="button"
-                            onClick={() => setActiveRatingName(null)}
-                            className="text-xs text-slate-400 hover:text-slate-600 font-bold"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-
-                        {/* Star Rating Selectors */}
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                              key={star}
-                              type="button"
-                              onClick={() => setFormRating(star)}
-                              className="transition-transform active:scale-95"
-                            >
-                              <Star 
-                                size={18} 
-                                className={`${star <= formRating ? "fill-amber-400 text-amber-400" : "text-slate-300 hover:text-amber-400"}`}
-                              />
-                            </button>
-                          ))}
-                          <span className="text-[11px] font-bold text-slate-600 ml-2">({formRating} Stars)</span>
-                        </div>
-
-                        <input
-                          type="text"
-                          placeholder="Short Performance review..."
-                          value={formComment}
-                          onChange={(e) => setFormComment(e.target.value)}
-                          className="w-full text-xs px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#1dbf73]"
-                          required
-                        />
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!formComment.trim()) return;
-                            const bName = localStorage.getItem("businessName") || "Aroma Coffee Roasters";
-                            addInfluencerReview(referrer.name, {
-                              reviewerName: bName,
-                              rating: formRating,
-                              comment: formComment.trim(),
-                              avatar: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=100&h=100&fit=crop&q=80"
-                            });
-                            setFormComment("");
-                            setRatingSuccessName(referrer.name);
-                            setTriggerCount(prev => prev + 1);
-                            setTimeout(() => {
-                              setRatingSuccessName(null);
-                              setActiveRatingName(null);
-                            }, 2000);
-                          }}
-                          className="w-full bg-[#1dbf73] hover:bg-[#19a463] text-white text-xs font-bold py-1.5 rounded-lg transition-colors cursor-pointer text-center"
-                        >
-                          Submit Partner Feedback
-                        </button>
-                      </div>
-                    )}
-
-                    {ratingSuccessName === referrer.name && (
-                      <p className="text-[11px] text-green-600 font-bold text-center mt-2">
-                        ✓ Rating submitted successfully!
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>

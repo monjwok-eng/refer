@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { getInfluencerRatings, getBusinessRatings } from "../utils/ratingStore";
-import { Star, MessageSquare } from "lucide-react";
 import {
   Wallet,
   ArrowRight,
@@ -42,7 +40,6 @@ export default function HustlerDashboard() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [showBalance, setShowBalance] = useState(true);
-  const [lookupBrand, setLookupBrand] = useState("Aroma Coffee Roasters");
 
   const userType = localStorage.getItem("userType") || "hustler";
   const name = userType === "business"
@@ -205,119 +202,6 @@ export default function HustlerDashboard() {
                   </div>
                </div>
             </div>
-
-            {/* Advocate Brand Trust directory & Received Reviews Hub */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Part 1: My Reviews from Brands */}
-              <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-left">
-                <div className="flex items-center gap-2 mb-4">
-                  <Award className="text-[#1dbf73]" size={20} />
-                  <h3 className="text-[16px] font-bold text-[#222325]">Brand Testimonials about Me</h3>
-                </div>
-                
-                {(() => {
-                  const rData = getInfluencerRatings(name);
-                  if (rData.reviews.length === 0) {
-                    return (
-                      <div className="py-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-xl">
-                        <p className="text-xs text-slate-400">No testimonials from partner brands yet. Complete campaign referrals to build your trust index!</p>
-                      </div>
-                    );
-                  }
-                  
-                  return (
-                    <div className="space-y-3.5 max-h-[290px] overflow-y-auto pr-1">
-                      {rData.reviews.map((rev) => (
-                        <div key={rev.id} className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-left space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-slate-800">{rev.reviewerName}</span>
-                            <div className="flex items-center gap-0.5 text-amber-500 text-[10px]">
-                              <Star size={10} className="fill-amber-400 text-amber-400" />
-                              <span>{rev.rating}.0</span>
-                            </div>
-                          </div>
-                          <p className="text-[11px] text-slate-600 italic">"{rev.comment}"</p>
-                          <span className="block text-[9px] text-slate-400 text-right">{new Date(rev.timestamp).toLocaleDateString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()}
-              </div>
-
-              {/* Part 2: Brand Trust Lookup Directory */}
-              <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-left flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Search className="text-[#1dbf73]" size={20} />
-                    <h3 className="text-[16px] font-bold text-[#222325]">Brand Trust Directory</h3>
-                  </div>
-                  <p className="text-xs text-slate-500 mb-4">Find brand trust indices, read feedback from peer influencers, and check payout speeds.</p>
-                  
-                  {/* Select dropdown of brands */}
-                  <div className="mb-4">
-                    <label className="block text-[10px] uppercase font-heavy text-slate-400 tracking-wider mb-1">Select and Query Brand</label>
-                    <select
-                      value={lookupBrand}
-                      onChange={(e) => setLookupBrand(e.target.value)}
-                      className="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] focus:bg-white cursor-pointer"
-                    >
-                      <option value="Aroma Coffee Roasters">Aroma Coffee Roasters</option>
-                      <option value="Nile Safaris Uganda">Nile Safaris Uganda</option>
-                      <option value="Elite Tech Uganda">Elite Tech Uganda</option>
-                      <option value="M-Kopa Uganda">M-Kopa Uganda</option>
-                      {/* Dynamic deals append if present */}
-                      {(() => {
-                        try {
-                          const saved = localStorage.getItem("all_deals");
-                          if (saved) {
-                            const parsed = JSON.parse(saved);
-                            return parsed.map((d: any) => (
-                              <option key={d.id} value={d.business}>{d.business}</option>
-                            ));
-                          }
-                        } catch(e) {}
-                        return null;
-                      })()}
-                    </select>
-                  </div>
-
-                  {/* Brand result panel */}
-                  {(() => {
-                    const brandRatings = getBusinessRatings(lookupBrand);
-                    return (
-                      <div className="bg-slate-50 p-4 border border-slate-200/60 rounded-xl space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-slate-700">{lookupBrand}</span>
-                          <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200 text-amber-800 text-[10px] font-bold">
-                            <Star size={10} className="fill-amber-400 text-amber-400" />
-                            <span>{brandRatings.averageRating} ({brandRatings.totalReviews} reviews)</span>
-                          </div>
-                        </div>
-
-                        {brandRatings.reviews.length === 0 ? (
-                          <p className="text-[11px] text-slate-400 italic">No reviews logged for this brand. Be the first to try out their referrals!</p>
-                        ) : (
-                          <div className="space-y-2">
-                            <p className="text-[11px] text-slate-600 line-clamp-2 italic">
-                              "{brandRatings.reviews[brandRatings.reviews.length - 1].comment}"
-                            </p>
-                            <span className="block text-[9px] text-[#1dbf73] font-heavy uppercase">
-                              ✓ Verified referral payout completed
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400">Total verified Uganda brands</span>
-                  <span className="font-bold text-slate-800">12 Connected</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Sidebar / Profile Area */}
@@ -334,15 +218,6 @@ export default function HustlerDashboard() {
                 <div className="absolute top-0 right-0 w-6 h-6 bg-[#1dbf73] border-4 border-white rounded-full" />
               </div>
               <h3 className="text-lg font-bold text-[#222325]">{name}</h3>
-              {(() => {
-                const infRating = getInfluencerRatings(name);
-                return (
-                  <div className="flex items-center justify-center gap-1 mt-1 mb-2 text-amber-500 font-bold text-xs" id="hustler-sidebar-rating">
-                    <Star size={12} className="fill-amber-400 text-amber-400 animate-pulse" />
-                    <span>{infRating.averageRating} Partner Score ({infRating.totalReviews} reviews)</span>
-                  </div>
-                );
-              })()}
               <p className="text-sm text-[#74767e] mb-4 italic">"Start referring to earn rewards."</p>
               
               <div className="pt-4 border-t border-gray-100 space-y-3">
