@@ -1,137 +1,213 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-
-const footerSections = [
-  {
-    title: "Top Referred Skills",
-    links: [
-      { name: "Graphics & Design", to: "/categories/graphics-design" },
-      { name: "Digital Marketing", to: "/categories/online-marketing" },
-      { name: "Writing & Translation", to: "/categories/writing-translation" },
-      { name: "Video & Animation", to: "/categories/video-animation" },
-      { name: "Programming & Tech", to: "/categories/programming-tech" },
-      { name: "Business Consulting", to: "/categories/business" },
-      { name: "Lifestyle & Health", to: "/categories/lifestyle" },
-    ],
-  },
-  {
-    title: "For Clients",
-    links: [
-      { name: "How Referrals Work", to: "/how-it-works" },
-      { name: "Success Stories", to: "/success-stories" },
-      { name: "Trust & Safety", to: "/trust-safety" },
-      { name: "Our Mission", to: "/mission" },
-    ],
-  },
-  {
-    title: "For Professionals",
-    links: [
-      { name: "Build Reputation", to: "/reputation" },
-      { name: "Partner Program", to: "/partner" },
-      { name: "Community Hub", to: "/community" },
-      { name: "Professional Events", to: "/events" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { name: "About Us", to: "/about" },
-      { name: "Careers", to: "/careers" },
-      { name: "Terms of Service", to: "/terms" },
-      { name: "Privacy Policy", to: "/privacy" },
-    ],
-  },
-];
+import { Logo } from "./Logo";
 
 export default function Footer() {
+  const [openSection, setOpenSection] = useState<string | null>(null);
+
+  const toggleSection = (title: string) => {
+    setOpenSection(openSection === title ? null : title);
+  };
+
+  const sections = [
+    {
+      title: "Platform",
+      links: [
+        { name: "Referral Platform", href: "#" },
+        { name: "Web Builder", href: "#" },
+        { name: "Reward Rules", href: "#" },
+        { name: "Analytics Dashboard", href: "#" },
+        { name: "Ad Network", href: "#" },
+        { name: "Growth Tools", href: "#" },
+        { name: "Partner Earnings", href: "#" }
+      ]
+    },
+    {
+      title: "Referr for",
+      links: [
+        { name: "Business", href: "#" },
+        { name: "Content Creators", href: "#" },
+        { name: "Developers", href: "#" },
+        { name: "Health & Fitness", href: "#" },
+        { name: "Agencies", href: "#" },
+        { name: "Consultants", href: "#" }
+      ]
+    },
+    {
+      title: "Resources",
+      links: [
+        { name: "Blog", href: "#" },
+        { name: "Guides", href: "#" },
+        { name: "Case Studies", href: "#" },
+        { name: "Webinars", href: "#" },
+        { name: "Partners", href: "#" },
+        { name: "Comparisons", href: "#" }
+      ]
+    },
+    {
+      title: "Help",
+      links: [
+        { name: "Support Center", href: "#" },
+        { name: "Community", href: "#" },
+        { name: "Status Page", href: "#" },
+        { name: "API Docs", href: "#" },
+        { name: "Changelog", href: "#" }
+      ]
+    },
+    {
+      title: "Company",
+      links: [
+        { name: "About Us", href: "#" },
+        { name: "Careers", href: "#" },
+        { name: "Press", href: "#" },
+        { name: "Contact", href: "#" },
+        { name: "Integrations", href: "#" }
+      ]
+    }
+  ];
+
   return (
-    <footer className="bg-[#001e00] text-white py-16 font-sans">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 border-b border-white/10 pb-16">
-        {footerSections.map((section) => (
-          <div key={section.title}>
-            <h4 className="font-bold text-white mb-6 text-[16px]">
-              {section.title}
-            </h4>
-            <ul className="space-y-4">
-              {section.links.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.to}
-                    className="text-white/70 hover:text-white hover:underline transition-colors text-[14px]"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-      <div className="py-8">
-        <div className="max-w-[1400px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-6">
-            <span className="text-[28px] font-black text-white tracking-tighter font-display">
-              Referr
-              <span className="text-[#1dbf73] text-[32px] leading-[0] ml-[1px]">
-                .
-              </span>
-            </span>
-            <span className="text-white/40 text-[14px]">
-              © Referr International Ltd. 2026
-            </span>
-          </div>
-          <div className="flex items-center gap-8">
-            <ul className="flex items-center gap-5">
-              <li>
-                <a
-                  href="#"
-                  className="text-white hover:text-[#1dbf73] transition-colors"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M21 12.033C21 7.043 16.972 3 12 3s-9 4.043-9 9.033a9.028 9.028 0 006.826 8.765v-6.005H7.968v-2.76h1.858v-1.19c0-3.074 1.386-4.497 4.392-4.497.568 0 1.555.112 1.954.224v2.5a11.71 11.71 0 00-1.04-.033c-1.476 0-2.045.56-2.045 2.02v.976h2.941l-.504 2.76h-2.433V21C17.548 20.458 21 16.65 21 12.033z"></path>
-                  </svg>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-white hover:text-[#1dbf73] transition-colors"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M19.67 3H4.33C3.59 3 3 3.59 3 4.33v15.34C3 20.4 3.59 21 4.33 21h15.34c.73 0 1.33-.59 1.33-1.33V4.33C21 3.6 20.41 3 19.67 3zM8.36 18.33H5.65V9.74h2.71v8.6-.01zM7.01 8.55c-.86 0-1.56-.66-1.56-1.55s.7-1.55 1.56-1.55c.86 0 1.56.66 1.56 1.55s-.7 1.55-1.56 1.55zm11.33 9.79h-2.71v-4.7c0-1.39-.59-1.81-1.35-1.81-.8 0-1.59.6-1.59 1.85v4.66H9.98v-8.6h2.6v1.19h.03c.26-.53 1.18-1.43 2.57-1.43 1.51 0 3.14.9 3.14 3.52v5.32h.02z"></path>
-                  </svg>
-                </a>
-              </li>
-            </ul>
-            <div className="flex items-center gap-6 text-white font-bold text-[14px]">
-              <button className="hover:text-[#1dbf73] transition-colors cursor-pointer bg-transparent border-none p-0 flex items-center gap-2">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M8 0C3.58 0 0 3.58 0 8C0 12.42 3.58 16 8 16C12.42 16 16 12.42 16 8C16 3.58 12.42 0 8 0ZM7.5 14.45C4.07 14.15 1.5 11.28 1.5 8C1.5 7.6 1.54 7.21 1.62 6.83L5.5 10.71V11.5C5.5 12.33 6.17 13 7 13V14.45H7.5ZM12.78 12.03C12.52 11.45 11.96 11 11.3 11H10.5V9C10.5 8.45 10.05 8 9.5 8H6.5V6H8.5C9.05 6 9.5 5.55 9.5 5V4H11.5C12.28 4 12.92 4.6 13 5.37C13.91 6.11 14.5 7.15 14.5 8.35C14.5 9.85 13.8 11.18 12.78 12.03Z"></path>
-                </svg>
-                English
-              </button>
-              <button className="hover:text-[#1dbf73] transition-colors cursor-pointer bg-transparent border-none p-0">
-                $ USD
-              </button>
+    <footer className="bg-[#050505]">
+      <div className="py-8 px-4 md:py-16 md:px-8 xl:px-32 text-white">
+        <div className="mx-auto max-w-screen-xl">
+          {/* Top Brand & Message Row */}
+          <div className="flex flex-col items-center md:flex-row md:items-center md:justify-between gap-6 md:gap-10 w-full pb-10 text-center md:text-left">
+            <div className="flex items-center shrink-0 select-none mx-auto md:mx-0">
+              <Logo size="lg" theme="dark" />
             </div>
           </div>
+
+          {/* Mobile Accordion Menu (Visible only under md) */}
+          <div className="md:hidden w-full border-t py-10 border-[#4E4E6C]">
+            {sections.map(section => {
+              const isOpen = openSection === section.title;
+              return (
+                <div key={section.title} className="border-b border-gray-700 last:border-b-0">
+                  <button 
+                    onClick={() => toggleSection(section.title)}
+                    className="flex w-full items-center justify-between py-4 focus:outline-none"
+                  >
+                    <span className="text-sm font-bold">{section.title}</span>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="1em" 
+                      height="1em" 
+                      fill="currentColor" 
+                      viewBox="0 0 256 256" 
+                      className={`h-4 w-4 text-[#D6D6E0] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                    >
+                      <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path>
+                    </svg>
+                  </button>
+                  <div 
+                    className="overflow-hidden transition-all duration-200"
+                    style={{ maxHeight: isOpen ? `${section.links.length * 48}px` : "0px" }}
+                  >
+                    <div className="flex flex-col pb-2">
+                      {section.links.map(link => (
+                        <Link 
+                          key={link.name}
+                          to={link.href} 
+                          className="py-3 px-2 text-[14px] font-medium text-[#D6D6E0] transition hover:bg-white/5 active:bg-white/10 rounded-md"
+                        >
+                          {link.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Grid Menu (Visible from md up) */}
+          <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-5 gap-10 w-full border-t border-b py-12 border-[#4E4E6C]">
+            {sections.map(section => (
+              <div key={section.title} className="flex flex-col items-center md:items-start text-center md:text-left">
+                <p className="text-base font-bold mb-5 text-white">{section.title}</p>
+                <div className="flex flex-col gap-3">
+                  {section.links.map(link => (
+                    <Link 
+                      key={link.name}
+                      to={link.href}
+                      className="rounded-md text-sm font-medium text-[#D6D6E0] transition hover:underline cursor-pointer"
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom Row & Newsletter Signup */}
+          <div className="flex flex-col items-center justify-center py-8 md:flex-row md:justify-between gap-6">
+            <div className="flex flex-col items-center md:items-start gap-6">
+              <p className="max-w-lg font-bold text-center text-base md:text-left text-[#D6D6E0]">
+                Get Referr updates delivered directly to your inbox.
+              </p>
+              <div className="mx-auto md:mx-0">
+                <iframe
+                  src="https://embeds.beehiiv.com/2437321d-52a5-4086-bceb-1550db1eed6d?slim=true"
+                  data-test-id="beehiiv-embed"
+                  title="Product updates newsletter sign up form powered by Referr"
+                  height="52"
+                  frameBorder="0"
+                  scrolling="no"
+                  style={{ margin: 0, borderRadius: "0px", backgroundColor: "transparent" }}
+                  data-cmp-ab="2"
+                  data-cmp-info="8"
+                ></iframe>
+              </div>
+              <span className="leading-relaxed mt-4 block max-w-sm text-center text-[12px] md:text-left text-gray-400">
+                By subscribing you agree to our{" "}
+                <Link to="/docs" className="hover:underline text-white">Privacy Policy</Link>{" "}
+                and provide consent to receive updates from our company.
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-8 justify-between items-center md:items-end w-full md:w-auto">
+              <div className="flex items-center justify-center md:justify-end space-x-6 mb-auto">
+                <a className="flex items-center justify-center transition-transform hover:scale-110" href="#" title="YouTube">
+                  <span className="sr-only">YouTube</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 256 256" className="h-6 w-6 text-[#D6D6E0]">
+                    <path d="M164.44,121.34l-48-32A8,8,0,0,0,104,96v64a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM120,145.05V111l25.58,17ZM234.33,69.52a24,24,0,0,0-14.49-16.4C185.56,39.88,131,40,128,40s-57.56-.12-91.84,13.12a24,24,0,0,0-14.49,16.4C19.08,79.5,16,97.74,16,128s3.08,48.5,5.67,58.48a24,24,0,0,0,14.49,16.41C69,215.56,120.4,216,127.34,216h1.32c6.94,0,58.37-.44,91.18-13.11a24,24,0,0,0,14.49-16.41c2.59-10,5.67-28.22,5.67-58.48S236.92,79.5,234.33,69.52Zm-15.49,113a8,8,0,0,1-4.77,5.49c-31.65,12.22-85.48,12-86,12H128c-.54,0-54.33.2-86-12a8,8,0,0,1-4.77-5.49C34.8,173.39,32,156.57,32,128s2.8-45.39,5.16-54.47A8,8,0,0,1,41.93,68c30.52-11.79,81.66-12,85.85-12h.27c.54,0,54.38-.18,86,12a8,8,0,0,1,4.77,5.49C221.2,82.61,224,99.43,224,128S221.2,173.39,218.84,182.47Z"></path>
+                  </svg>
+                </a>
+                <a className="transition-transform hover:scale-110" href="#" title="TikTok">
+                  <span className="sr-only">TikTok</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 256 256" className="h-6 w-6 text-[#D6D6E0]">
+                    <path d="M224,72a48.05,48.05,0,0,1-48-48,8,8,0,0,0-8-8H128a8,8,0,0,0-8,8V156a20,20,0,1,1-28.57-18.08A8,8,0,0,0,96,130.69V88a8,8,0,0,0-9.4-7.88C50.91,86.48,24,119.1,24,156a76,76,0,0,0,152,0V116.29A103.25,103.25,0,0,0,224,128a8,8,0,0,0,8-8V80a8,8,0,0,0-8-8ZM-8,39.64a87.19,87.19,0,0,1-43.33-16.15A8,8,0,0,0,160,102v54a60,60,0,0,1-120,0c0-25.9,16.64-49.13,40-57.6v27.67A36,36,0,1,0,136,156V32h24.5A64.14,64.14,0,0,0,216,87.5Z"></path>
+                  </svg>
+                </a>
+                <a className="transition-transform hover:scale-110" href="#">
+                  <span className="sr-only">Instagram</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 256 256" className="h-6 w-6 text-[#D6D6E0]">
+                    <path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32,A32,32,0,0,1,128,160ZM176,24H80A56.06,56.06,0,0,0,24,80v96a56.06,56.06,0,0,0,56,56h96a56.06,56.06,0,0,0,56-56V80A56.06,56.06,0,0,0,176,24Zm40,152a40,40,0,0,1-40,40H80a40,40,0,0,1-40-40V80A40,40,0,0,1,80,40h96a40,40,0,0,1,40,40ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"></path>
+                  </svg>
+                </a>
+                <a className="transition-transform hover:scale-110" href="#">
+                  <span className="sr-only">X</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 256 256" className="h-6 w-6 text-[#D6D6E0]">
+                    <path d="M214.75,211.71l-62.6-98.38,61.77-67.95a8,8,0,0,0-11.84-10.76L143.24,99.34,102.75,35.71A8,8,0,0,0,96,32H48a8,8,0,0,0-6.75,12.3l62.6,98.37-61.77,68a8,8,0,1,0,11.84,10.76l58.84-64.72,40.49,63.63A8,8,0,0,0,160,224h48a8,8,0,0,0,6.75-12.29ZM164.39,208,62.57,48h29L193.43,208Z"></path>
+                  </svg>
+                </a>
+              </div>
+              <div className="mt-auto text-center md:text-right">
+                <span className="block text-sm text-gray-400 mb-4">© 2026 Referr, Inc. All rights reserved.</span>
+                <div className="flex flex-row justify-center md:justify-end flex-wrap gap-1 md:gap-4">
+                  <Link className="py-3 md:py-0 px-2 md:px-0 text-sm inline-block text-gray-400 hover:text-white transition-colors" to="/docs" title="Terms and Conditions">Terms</Link>
+                  <Link className="py-3 md:py-0 px-2 md:px-0 text-sm inline-block text-gray-400 hover:text-white transition-colors" to="/docs" title="Privacy Policy">Privacy</Link>
+                  <Link className="py-3 md:py-0 px-2 md:px-0 text-sm inline-block text-gray-400 hover:text-white transition-colors" to="/docs#privacy" title="California Privacy">California Privacy</Link>
+                  <Link className="py-3 md:py-0 px-2 md:px-0 text-sm inline-block text-gray-400 hover:text-white transition-colors" to="/docs" title="DSAR Form">DSAR Form</Link>
+                  <Link className="py-3 md:py-0 px-2 md:px-0 text-sm inline-block text-gray-400 hover:text-white transition-colors" to="/docs">Support</Link>
+                  <Link className="py-3 md:py-0 px-2 md:px-0 text-sm inline-block text-gray-400 hover:text-white transition-colors" to="/docs">Security</Link>
+                  <Link className="py-3 md:py-0 px-2 md:px-0 text-sm inline-block text-gray-400 hover:text-white transition-colors" to="/docs">Sitemap</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </footer>

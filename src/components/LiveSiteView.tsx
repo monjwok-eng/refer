@@ -94,7 +94,7 @@ export default function LiveSiteView({ forcedSlug, isSubdomainDirect }: LiveSite
       {/* Sleek Referr Branding & Control Bar */}
       <div className="w-full bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-xs font-medium shrink-0 z-50">
         <div className="flex items-center gap-2">
-          <span className="bg-[#1dbf73] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider text-white">Live Site</span>
+          <span className="bg-[#ec4899] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider text-white">Live Site</span>
           <span className="text-slate-400 hidden sm:inline">Created by</span>
           <span className="font-bold flex items-center gap-1">
             <Sparkles size={12} className="text-amber-400" />
@@ -105,22 +105,17 @@ export default function LiveSiteView({ forcedSlug, isSubdomainDirect }: LiveSite
         <div className="flex items-center gap-3">
           <button 
             onClick={handleShare}
-            className="flex items-center gap-1.5 hover:text-[#1dbf73] transition-colors py-1 px-2.5 rounded bg-white/10"
+            className="flex items-center gap-1.5 hover:text-[#ec4899] transition-colors py-1 px-2.5 rounded bg-white/10"
           >
-            {copied ? <Check size={12} className="text-emerald-400" /> : <Share2 size={12} />}
+            {copied ? <Check size={12} className="text-pink-400" /> : <Share2 size={12} />}
             <span>{copied ? "Copied Link!" : "Share"}</span>
           </button>
           
           <button 
             onClick={() => {
-              if (isSubdomainDirect) {
-                localStorage.removeItem("simulated_subdomain");
-                window.location.href = "/dashboard/business";
-              } else {
-                navigate("/dashboard/business");
-              }
+              navigate("/dashboard/business");
             }}
-            className="flex items-center gap-1 bg-[#1dbf73] hover:bg-[#19a463] text-white px-3 py-1 rounded font-bold transition-all text-[11px]"
+            className="flex items-center gap-1 bg-[#ec4899] hover:bg-pink-700 text-white px-3 py-1 rounded font-bold transition-all text-[11px]"
           >
             <ArrowLeft size={12} />
             <span>{isSubdomainDirect ? "Exit & Return to Dashboard" : "Dashboard"}</span>

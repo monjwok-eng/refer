@@ -51,9 +51,6 @@ export default function PublishModal({
       // Save user business site reference
       localStorage.setItem("user_published_slug", domainName);
       
-      // Set the simulation subdomain so it acts like a real domain locally
-      localStorage.setItem("simulated_subdomain", domainName);
-      
       // Notify components like dashboards to pull fresh values
       window.dispatchEvent(new Event("referr-notification-update"));
       
@@ -63,7 +60,6 @@ export default function PublishModal({
 
   const handleGoHome = () => {
     onClose();
-    localStorage.removeItem("simulated_subdomain"); // Clear so they enter the standard dashboard correctly
     setIsPublished(false);
     navigate("/dashboard/business");
   };
@@ -212,24 +208,22 @@ export default function PublishModal({
                     <span className="text-[13px] font-bold text-[#222325] underline decoration-[#222325]/30 truncate flex-1 leading-none tracking-tight">
                       https://{fullDomain}
                     </span>
-                    <button 
-                      onClick={() => {
-                        onClose();
-                        localStorage.setItem("simulated_subdomain", domainName);
-                        window.location.href = "/";
-                      }}
-                      className="text-[13px] font-bold text-[#1dbf73] hover:text-[#19a463] transition-colors shrink-0 px-2 py-1 bg-slate-50 border border-slate-100 rounded"
+                    <a 
+                      href={`https://${fullDomain}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={onClose}
+                      className="text-[13px] font-bold text-[#1dbf73] hover:text-[#19a463] transition-colors shrink-0 px-2 py-1 bg-slate-50 border border-slate-100 rounded inline-block text-center"
                     >
                       View Live
-                    </button>
+                    </a>
                   </div>
 
-                  <button 
-                    onClick={() => {
-                      onClose();
-                      localStorage.setItem("simulated_subdomain", domainName);
-                      window.location.href = "/";
-                    }}
+                  <a 
+                    href={`https://${fullDomain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={onClose}
                     className="flex items-center gap-2 text-[13px] font-light text-[#62646a] hover:text-[#222325] transition-all px-1 py-1 rounded w-fit group"
                   >
                     <Smartphone
@@ -242,7 +236,7 @@ export default function PublishModal({
                       size={14}
                       className="opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-4px] group-hover:translate-x-0 transition-all font-bold"
                     />
-                  </button>
+                  </a>
                 </div>
 
                 {/* Success Action */}

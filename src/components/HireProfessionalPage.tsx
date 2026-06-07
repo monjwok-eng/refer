@@ -54,7 +54,7 @@ export default function HireProfessionalPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white p-12 border-2 border-[#222325] text-center max-w-lg w-full"
         >
-          <div className="w-20 h-20 bg-emerald-50 border-2 border-[#222325] flex items-center justify-center mx-auto mb-6 text-[#1dbf73]">
+          <div className="w-20 h-20 bg-pink-50 border-2 border-[#222325] flex items-center justify-center mx-auto mb-6 text-[#ec4899]">
             <CheckCircle2 size={40} strokeWidth={2} />
           </div>
           <h3 className="text-xl font-black text-[#222325] mb-4 uppercase tracking-tight">

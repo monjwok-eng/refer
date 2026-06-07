@@ -106,26 +106,26 @@ export default function AnalyticsPage({ userType: initialUserType }: { userType?
   const currentStats = userType === 'business' ? businessStats[timeRange] : mockStats[timeRange];
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7] pb-24 text-[#404145]">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 pt-8 text-left">
-        <div className="flex flex-col md:flex-row items-center md:items-end justify-between mb-10 gap-6 text-left">
-          <div className="text-left space-y-1">
-            <h1 className="text-3xl md:text-4xl font-bold text-[#222325] tracking-tight">
+    <div className="w-full pb-24 text-slate-900">
+      <div className="max-w-7xl mx-auto pt-8">
+        <div className="flex flex-col md:flex-row items-center md:items-end justify-between mb-8 gap-6">
+          <div className="space-y-1">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
               Analytics Overview
             </h1>
-            <p className="text-[#62646a] text-lg">
-              Track your performance and optimized referral strategies.
+            <p className="text-slate-500 text-sm">
+              Track your performance and optimize referral strategies.
             </p>
           </div>
-          <div className="w-full md:w-auto flex items-center gap-1.5 bg-white border border-gray-200 p-1 rounded transition-all text-left">
+          <div className="w-full md:w-auto flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-lg transition-all shadow-sm">
             {["7 Days", "30 Days", "All Time"].map((range) => (
               <button 
                 key={range}
                 onClick={() => setTimeRange(range as any)}
-                className={`px-6 py-2.5 text-xs font-bold rounded transition-all ${
+                className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
                   timeRange === range 
-                    ? "bg-[#222325] text-white shadow-sm" 
-                    : "text-[#62646a] hover:text-[#222325] hover:bg-gray-50"
+                    ? "bg-slate-900 text-white shadow-sm" 
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 }`}
               >
                 {range}
@@ -135,11 +135,11 @@ export default function AnalyticsPage({ userType: initialUserType }: { userType?
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 text-left">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white rounded border border-gray-200 p-8 shadow-sm">
-                <Skeleton className="w-10 h-10 mb-6" />
+              <div key={i} className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <Skeleton className="w-10 h-10 mb-4" />
                 <Skeleton className="w-24 h-3 mb-2" />
                 <Skeleton className="w-20 h-8" />
               </div>
@@ -179,21 +179,21 @@ export default function AnalyticsPage({ userType: initialUserType }: { userType?
         </div>
 
         {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 text-left">
-          {/* Referral Volume */}
-          <div className="bg-white rounded-lg p-8 md:p-10 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-10 text-left">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Revenue Volume */}
+          <div className="bg-white rounded-xl p-6 shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-slate-200/80">
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-xl font-bold text-[#222325]">
+                <h3 className="text-lg font-bold text-slate-900">
                   Revenue Volume
                 </h3>
-                <p className="text-xs text-[#95979d] mt-1 uppercase tracking-wider font-bold">Earnings over time</p>
+                <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-bold">Earnings over time</p>
               </div>
-              <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-[#1dbf73]">
-                <TrendingUp size={24} />
+              <div className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center text-pink-600">
+                <TrendingUp size={20} />
               </div>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-[250px] w-full">
               {isLoading ? (
                 <div className="space-y-4 h-full flex flex-col justify-end">
                   <div className="flex items-end gap-2 h-full">
@@ -211,44 +211,44 @@ export default function AnalyticsPage({ userType: initialUserType }: { userType?
                   <AreaChart data={currentData}>
                     <defs>
                       <linearGradient id="colorRef" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#1dbf73" stopOpacity={0.1} />
-                        <stop offset="95%" stopColor="#1dbf73" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#ec4899" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#ec4899" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid
-                      strokeDasharray="4 4"
+                      strokeDasharray="3 3"
                       vertical={false}
-                      stroke="#f1f1f1"
+                      stroke="#f1f5f9"
                     />
                     <XAxis
                       dataKey="name"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 11, fontWeight: 600, fill: "#b5b6ba" }}
-                      dy={15}
+                      tick={{ fontSize: 11, fontWeight: 600, fill: "#94a3b8" }}
+                      dy={10}
                     />
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 11, fontWeight: 600, fill: "#b5b6ba" }}
+                      tick={{ fontSize: 11, fontWeight: 600, fill: "#94a3b8" }}
                     />
                     <Tooltip
                       contentStyle={{
-                        border: "1px solid #e4e5e7",
-                        borderRadius: "4px",
-                        boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
-                        padding: "12px",
+                        border: "none",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                        padding: "10px",
                       }}
-                      labelStyle={{ fontWeight: 700, marginBottom: '4px', color: '#222325' }}
+                      labelStyle={{ fontWeight: 700, marginBottom: '4px', color: '#0f172a' }}
                     />
                     <Area
                       type="monotone"
                       dataKey="referrals"
-                      stroke="#1dbf73"
-                      strokeWidth={3}
+                      stroke="#ec4899"
+                      strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorRef)"
-                      animationDuration={2000}
+                      animationDuration={1500}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -256,23 +256,23 @@ export default function AnalyticsPage({ userType: initialUserType }: { userType?
             </div>
           </div>
 
-          {/* Clicks Distribution */}
-          <div className="bg-white rounded-lg p-8 md:p-10 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-10 text-left">
+          {/* Campaign Clicks */}
+          <div className="bg-white rounded-xl p-6 shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-slate-200/80">
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-xl font-bold text-[#222325]">
+                <h3 className="text-lg font-bold text-slate-900">
                   Campaign Clicks
                 </h3>
-                <p className="text-xs text-[#95979d] mt-1 uppercase tracking-wider font-bold">Interactions peak</p>
+                <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-bold">Interactions peak</p>
               </div>
-              <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-[#222325]">
-                <MousePointer2 size={24} />
+              <div className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center text-slate-900">
+                <MousePointer2 size={20} />
               </div>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-[250px] w-full">
               {isLoading ? (
                 <div className="space-y-4 h-full flex flex-col justify-end">
-                  <div className="flex items-end gap-4 h-full">
+                  <div className="flex items-end gap-2 h-full">
                     {[60, 40, 85, 30, 95, 50, 75].map((h, i) => (
                       <Skeleton
                         key={i}
@@ -286,36 +286,36 @@ export default function AnalyticsPage({ userType: initialUserType }: { userType?
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={currentData}>
                     <CartesianGrid
-                      strokeDasharray="4 4"
+                      strokeDasharray="3 3"
                       vertical={false}
-                      stroke="#f1f1f1"
+                      stroke="#f1f5f9"
                     />
                     <XAxis
                       dataKey="name"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 11, fontWeight: 600, fill: "#b5b6ba" }}
-                      dy={15}
+                      tick={{ fontSize: 11, fontWeight: 600, fill: "#94a3b8" }}
+                      dy={10}
                     />
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 11, fontWeight: 600, fill: "#b5b6ba" }}
+                      tick={{ fontSize: 11, fontWeight: 600, fill: "#94a3b8" }}
                     />
                     <Tooltip
                       contentStyle={{
-                        border: "1px solid #e4e5e7",
-                        borderRadius: "4px",
-                        boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
-                        padding: "12px",
+                        border: "none",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                        padding: "10px",
                       }}
-                      labelStyle={{ fontWeight: 700, marginBottom: '4px', color: '#222325' }}
+                      labelStyle={{ fontWeight: 700, marginBottom: '4px', color: '#0f172a' }}
                     />
                     <Bar 
                       dataKey="clicks" 
-                      fill="#222325" 
+                      fill="#0f172a" 
                       radius={[4, 4, 0, 0]} 
-                      barSize={32}
+                      barSize={24}
                       animationDuration={1500}
                     />
                   </BarChart>
@@ -331,15 +331,15 @@ export default function AnalyticsPage({ userType: initialUserType }: { userType?
 
 function StatCard({ icon: Icon, label, value, change, isPositive }: any) {
   return (
-    <div className="bg-white rounded border border-gray-200 p-8 shadow-sm hover:border-[#1dbf73] transition-all group relative">
+    <div className="bg-white rounded border border-gray-200 p-8 shadow-sm hover:border-[#ec4899] transition-all group relative">
       <div className="flex items-center justify-between mb-8 relative z-10 text-left">
-        <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-[#95979d] group-hover:bg-[#1dbf73] group-hover:text-white transition-all duration-300">
+        <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-[#95979d] group-hover:bg-[#ec4899] group-hover:text-white transition-all duration-300">
           <Icon size={24} />
         </div>
         <div
           className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs font-bold ${
             isPositive 
-              ? "text-[#1dbf73]" 
+              ? "text-[#ec4899]" 
               : "text-rose-500"
           }`}
         >

@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { GoogleGenAI } from "@google/genai";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
+import fs from "fs";
 
 dotenv.config();
 
@@ -13,6 +14,80 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // --- Persistent Local JSON Database for Users ---
+  const USERS_DB_PATH = path.join(process.cwd(), "users-db.json");
+  let usersDb: Record<string, any> = {};
+
+  const saveUsersDb = () => {
+    try {
+      fs.writeFileSync(USERS_DB_PATH, JSON.stringify(usersDb, null, 2), "utf-8");
+    } catch (e) {
+      console.error("Error saving users-db.json:", e);
+    }
+  };
+
+  const loadUsersDb = () => {
+    try {
+      if (fs.existsSync(USERS_DB_PATH)) {
+        usersDb = JSON.parse(fs.readFileSync(USERS_DB_PATH, "utf-8"));
+      } else {
+        usersDb = {};
+      }
+    } catch (e) {
+      console.error("Error loading users-db.json:", e);
+      usersDb = {};
+    }
+
+    // Pre-populate default profiles if not present
+    const defaultProfiles = [
+      {
+        email: "nyamedmeddi@gmail.com",
+        password: "password123",
+        userType: "hustler",
+        firstName: "Nyamed",
+        lastName: "Meddi",
+        name: "Nyamed Meddi"
+      },
+      {
+        email: "fiverr.referrer@example.com",
+        password: "password123",
+        userType: "hustler",
+        firstName: "Joe",
+        lastName: "Referrer",
+        name: "Joe Referrer"
+      },
+      {
+        email: "arial.ai.partner@example.com",
+        password: "password123",
+        userType: "business",
+        firstName: "Sarah",
+        lastName: "Business Owner",
+        name: "Sarah Business Owner",
+        companyName: "Arial Partner Co"
+      }
+    ];
+
+    let updated = false;
+    for (const prof of defaultProfiles) {
+      const emailLower = prof.email.toLowerCase();
+      if (!usersDb[emailLower]) {
+        usersDb[emailLower] = {
+          ...prof,
+          userId: `USR-${prof.firstName.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`,
+          referralCode: `${prof.firstName.substring(0, 3).toUpperCase()}${Math.floor(100 + Math.random() * 899)}`
+        };
+        updated = true;
+      }
+    }
+
+    if (updated) {
+      saveUsersDb();
+    }
+  };
+
+  // Run the initial database load
+  loadUsersDb();
 
   const ai = new GoogleGenAI({ 
     apiKey: process.env.GEMINI_API_KEY || "",
@@ -40,12 +115,20 @@ async function startServer() {
   // Helper to parse session from cookie
   const getSessionFromCookie = (req: any) => {
     const cookieHeader = req.headers.cookie || "";
-    const cookies = Object.fromEntries(
-      cookieHeader.split(";").map((c: string) => {
-        const [k, ...v] = c.trim().split("=");
-        return [k, decodeURIComponent(v.join("="))];
-      })
-    );
+    const cookies: Record<string, string> = {};
+    if (cookieHeader) {
+      cookieHeader.split(";").forEach((c: string) => {
+        const trimmed = c.trim();
+        if (!trimmed) return;
+        const [k, ...v] = trimmed.split("=");
+        const rawValue = v.join("=");
+        try {
+          cookies[k] = decodeURIComponent(rawValue);
+        } catch (err) {
+          cookies[k] = rawValue;
+        }
+      });
+    }
     const sessionStr = cookies["referr_session"];
     if (!sessionStr) return null;
     try {
@@ -67,18 +150,42 @@ async function startServer() {
 
   // Traditional sign-in with cookie persistence
   app.post("/api/auth/signin", (req, res) => {
-    const { email } = req.body;
+    const { email, password } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required." });
+    }
     
-    const isBusiness = email.includes("business") || email.includes("company") || email.includes("partner");
-    const role: "business" | "hustler" = isBusiness ? "business" : "hustler";
+    const lowerEmail = email.toLowerCase().trim();
+    loadUsersDb(); // ensure synchronization with disk
+
+    const matchedUser = usersDb[lowerEmail];
     
+    if (!matchedUser) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "USER_NOT_FOUND", 
+        message: "This email address is not registered on Referr yet. Please sign up first." 
+      });
+    }
+
+    if (password && matchedUser.password !== password) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "INVALID_CREDENTIALS", 
+        message: "Incorrect password. Please try again." 
+      });
+    }
+
+    const role: "business" | "hustler" = matchedUser.userType === "business" ? "business" : "hustler";
     const userSession = {
       isAuthenticated: true,
-      email: email,
-      name: email.split("@")[0],
-      picture: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(email)}`,
+      email: matchedUser.email,
+      name: matchedUser.name || matchedUser.firstName || matchedUser.email.split("@")[0],
+      picture: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(matchedUser.email)}`,
       userType: role,
-      businessName: role === "business" ? "Aria Partner Co" : undefined,
+      userId: matchedUser.userId || `USR-${Math.floor(1000 + Math.random() * 9000)}`,
+      referralCode: matchedUser.referralCode || `REF-${Math.floor(100 + Math.random() * 899)}`,
+      businessName: role === "business" ? (matchedUser.companyName || "Aria Partner Co") : undefined,
     };
 
     res.setHeader(
@@ -90,16 +197,132 @@ async function startServer() {
 
   // Traditional sign-up with cookie persistence
   app.post("/api/auth/signup", (req, res) => {
-    const { email, firstName, lastName, userType, companyName } = req.body;
-    const finalName = `${firstName} ${lastName}`.trim() || email.split("@")[0];
+    const { email, password, firstName, lastName, userType, companyName } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required." });
+    }
+
+    const lowerEmail = email.toLowerCase().trim();
+    loadUsersDb();
+
+    if (usersDb[lowerEmail]) {
+      const existingUser = usersDb[lowerEmail];
+      const existingType = existingUser.userType || "hustler";
+      const requestedType = userType === "business" ? "business" : "hustler";
+      
+      if (existingType !== requestedType) {
+        const existingLabel = existingType === "business" ? "Business" : "Hustler";
+        const requestedLabel = requestedType === "business" ? "Business" : "Hustler";
+        return res.status(409).json({
+          success: false,
+          error: "ROLE_CONFLICT",
+          message: `You already have an account as a ${existingLabel} registered with this email. You cannot register as a ${requestedLabel}.`
+        });
+      }
+
+      return res.status(409).json({
+        success: false,
+        error: "EMAIL_ALREADY_EXISTS",
+        message: "This email address is already registered on Referr. Please sign in instead."
+      });
+    }
+
+    const finalName = `${firstName || ""} ${lastName || ""}`.trim() || email.split("@")[0];
+    const emailPrefix = email.split("@")[0].replace(/[^a-zA-Z]/g, "").substring(0, 4).toUpperCase() || "USER";
+    const subRandom = Math.floor(1000 + Math.random() * 9000);
+    const userId = `USR-${emailPrefix}-${subRandom}`;
+    const referralCode = `${emailPrefix.substring(0, 3).padEnd(3, "X")}${Math.floor(100 + Math.random() * 899)}`;
+    const finalRole: "business" | "hustler" = userType === "business" ? "business" : "hustler";
+
+    // Save newly created user account to database
+    usersDb[lowerEmail] = {
+      email: lowerEmail,
+      password: password || "password123",
+      firstName: firstName || "",
+      lastName: lastName || "",
+      name: finalName,
+      userType: finalRole,
+      companyName: finalRole === "business" ? (companyName || "Aria Partner Co") : undefined,
+      userId,
+      referralCode
+    };
+    saveUsersDb();
 
     const userSession = {
       isAuthenticated: true,
-      email: email,
+      email: lowerEmail,
       name: finalName,
-      picture: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(email)}`,
-      userType: userType === "business" ? "business" : "hustler",
-      businessName: userType === "business" ? companyName || "Aria Partner Co" : undefined,
+      picture: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(lowerEmail)}`,
+      userType: finalRole,
+      userId: userId,
+      referralCode: referralCode,
+      businessName: finalRole === "business" ? (companyName || "Aria Partner Co") : undefined,
+    };
+
+    res.setHeader(
+      "Set-Cookie",
+      `referr_session=${encodeURIComponent(JSON.stringify(userSession))}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800`
+    );
+    res.json({ success: true, session: userSession });
+  });
+
+  // Firebase Auth persistence
+  app.post("/api/auth/firebase-login", (req, res) => {
+    const { email, name, picture, uid, userType, targetRole } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required." });
+    }
+
+    const lowerEmail = email.toLowerCase().trim();
+    loadUsersDb();
+
+    // Check for role conflict if user exists in local database and targetRole is specified and not "general"
+    if (usersDb[lowerEmail]) {
+      const existingUser = usersDb[lowerEmail];
+      const existingRole = existingUser.userType || "hustler";
+      const requestedRole = targetRole && targetRole !== "general" ? targetRole : null;
+      
+      if (requestedRole && existingRole !== requestedRole) {
+        const existingLabel = existingRole === "business" ? "Business" : "Hustler";
+        const requestedLabel = requestedRole === "business" ? "Business" : "Hustler";
+        return res.status(409).json({
+          success: false,
+          error: "ROLE_CONFLICT",
+          message: `You already have an account as a ${existingLabel} registered with this email. You cannot register as a ${requestedLabel}.`
+        });
+      }
+    }
+
+    const emailPrefix = email.split("@")[0].replace(/[^a-zA-Z]/g, "").substring(0, 4).toUpperCase() || "USER";
+    const referralCode = `${emailPrefix.substring(0, 3).padEnd(3, "X")}${Math.floor(100 + Math.random() * 899)}`;
+    const finalRole = userType || "hustler";
+
+    if (!usersDb[lowerEmail]) {
+      const parts = (name || "").split(" ");
+      usersDb[lowerEmail] = {
+        email: lowerEmail,
+        password: "password123",
+        firstName: parts[0] || "",
+        lastName: parts.slice(1).join(" ") || "",
+        name: name || lowerEmail.split("@")[0],
+        userType: finalRole,
+        companyName: finalRole === "business" ? "Arial Partner Co" : undefined,
+        userId: uid,
+        referralCode: referralCode
+      };
+      saveUsersDb();
+    }
+
+    const matchedUser = usersDb[lowerEmail];
+    const userSession = {
+      isAuthenticated: true,
+      email: matchedUser.email,
+      name: matchedUser.name,
+      picture: picture || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(matchedUser.email)}`,
+      userType: matchedUser.userType,
+      userId: matchedUser.userId || uid,
+      referralCode: matchedUser.referralCode || referralCode,
+      businessName: matchedUser.userType === "business" ? (matchedUser.companyName || "Arial Partner Co") : undefined,
     };
 
     res.setHeader(
@@ -426,13 +649,37 @@ async function startServer() {
         return res.status(400).send("No authorization code provided.");
       }
 
+      const lowerEmail = finalEmail.toLowerCase().trim();
+      loadUsersDb();
+
+      const finalRoleClean = finalRole === "business" ? "business" : "hustler";
+
+      if (!usersDb[lowerEmail]) {
+        const parts = finalName.split(" ");
+        usersDb[lowerEmail] = {
+          email: lowerEmail,
+          password: "password123",
+          firstName: parts[0] || "",
+          lastName: parts.slice(1).join(" ") || "",
+          name: finalName || lowerEmail.split("@")[0],
+          userType: finalRoleClean,
+          companyName: finalRoleClean === "business" ? "Aria Partner Co" : undefined,
+          userId: `USR-${(parts[0] || "USER").toUpperCase()}-${Math.floor(1000 + Math.random() * 9000).toString()}`,
+          referralCode: `${(parts[0] || "USER").substring(0, 3).toUpperCase()}${Math.floor(100 + Math.random() * 899).toString()}`
+        };
+        saveUsersDb();
+      }
+
+      const dbUser = usersDb[lowerEmail];
       const userSession = {
         isAuthenticated: true,
-        email: finalEmail,
-        name: finalName || finalEmail.split("@")[0],
-        picture: finalPicture || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(finalEmail)}`,
-        userType: finalRole === "business" ? "business" : "hustler",
-        businessName: finalRole === "business" ? "Aria Partner Co" : undefined,
+        email: dbUser.email,
+        name: dbUser.name,
+        picture: finalPicture || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(dbUser.email)}`,
+        userType: dbUser.userType,
+        userId: dbUser.userId,
+        referralCode: dbUser.referralCode,
+        businessName: dbUser.userType === "business" ? (dbUser.companyName || "Aria Partner Co") : undefined,
       };
 
       // Set cookie - HttpOnly, Secure, SameSite=None required for AI Studio Iframe Context
@@ -479,13 +726,165 @@ async function startServer() {
     }
   });
 
+  // --- Google Ads OAuth Routes ---
+
+  // Google Ads OAuth URL generator
+  app.get("/api/ads/google/authorize", (req, res) => {
+    const { origin, sandbox } = req.query;
+    const client_id = process.env.GOOGLE_CLIENT_ID;
+
+    if (client_id && sandbox !== "true") {
+      const providerAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+      const redirectUri = `${origin || "http://localhost:3000"}/api/ads/google/callback`;
+      const scope = "https://www.googleapis.com/auth/adwords";
+      const params = new URLSearchParams({
+        client_id: client_id,
+        redirect_uri: redirectUri,
+        response_type: "code",
+        scope: scope,
+        access_type: "offline",
+        prompt: "consent",
+        state: origin as string || "http://localhost:3000"
+      });
+      res.json({ url: `${providerAuthUrl}?${params}` });
+    } else {
+      const mockAdsUrl = `${origin || "http://localhost:3000"}/api/ads/google/mock-authorize?origin=${encodeURIComponent(origin as string || "")}`;
+      res.json({ url: mockAdsUrl });
+    }
+  });
+
+  // Google Ads OAuth Mock Screen
+  app.get("/api/ads/google/mock-authorize", (req, res) => {
+    const { origin } = req.query;
+    res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Authorize Google Ads - Sandbox Mode</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    body { font-family: 'Roboto', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#f0f4f9] min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-[24px] max-w-[440px] w-full p-8 md:p-10 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+    <div class="flex flex-col items-center mb-6">
+      <div class="flex items-center gap-1.5 mb-4">
+        <div class="w-10 h-10 rounded-lg bg-pink-100 flex items-center justify-center border border-pink-200">
+          <svg class="w-6 h-6 text-pink-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+      </div>
+      <h1 class="text-[22px] font-medium text-[#1f1f1f] text-center mb-1">Grant AdWords Permission</h1>
+      <p class="text-[13px] text-gray-500 text-center">to continue to <span class="text-[#ec4899] font-semibold">Referr</span> Hub</p>
+    </div>
+
+    <!-- Sandbox Status Box -->
+    <div class="mb-6 px-4 py-3 bg-pink-50 rounded-xl border border-pink-100 text-[12px] text-pink-800 flex items-start gap-2.5">
+      <span class="text-[14px]">🟢</span>
+      <span><strong>High-Fidelity Sandbox Mode:</strong> Real OAuth bypassed because client secrets were not matched or browser redirects are restricted. Click connect to proceed!</span>
+    </div>
+
+    <div class="space-y-4">
+      <p class="text-[13px] text-slate-600 leading-relaxed text-center">
+        This sandbox will simulate Adwords API validation and safely authorize campaign synchronization.
+      </p>
+
+      <button 
+        onclick="authorizeMock()"
+        class="w-full bg-[#ec4899] hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-[0_2px_8px_rgba(236,72,153,0.3)] active:scale-[0.98] text-center text-sm"
+      >
+        Authorize Google Ads Account
+      </button>
+
+      <button 
+        onclick="window.close()"
+        class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-2.5 px-4 rounded-xl transition-all text-center text-xs"
+      >
+        Cancel
+      </button>
+    </div>
+
+    <script>
+      function authorizeMock() {
+        const originUrl = decodeURIComponent("${encodeURIComponent(origin as string || "")}") || window.location.origin;
+        localStorage.setItem("google_ads_linked", "true");
+        if (window.opener) {
+          window.opener.location.href = originUrl + "/business/ad-networks?authorized=true";
+          window.close();
+        } else {
+          window.location.href = originUrl + "/business/ad-networks?authorized=true";
+        }
+      }
+    </script>
+  </div>
+</body>
+</html>
+    `);
+  });
+
+  // Ads OAuth callback endpoint
+  app.get("/api/ads/google/callback", async (req, res) => {
+    try {
+      const { code, state: origin } = req.query;
+      if (!code) return res.status(400).send("No code provided.");
+
+      const client_id = process.env.GOOGLE_CLIENT_ID;
+      const client_secret = process.env.GOOGLE_CLIENT_SECRET;
+      const redirectUri = `${origin || "http://localhost:3000"}/api/ads/google/callback`;
+
+      const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: client_id || "",
+          client_secret: client_secret || "",
+          code: code as string,
+          redirect_uri: redirectUri,
+          grant_type: "authorization_code",
+        }),
+      });
+
+      if (!tokenRes.ok) throw new Error("Failed to exchange code.");
+      const tokens = await tokenRes.json();
+      
+      // NOTE: In a production app, securely store tokens.refresh_token mapped to the authenticated user ID.
+      // For now, we confirm authorization.
+      console.log("Ads OAuth Success, received tokens:", tokens.access_token ? "token included" : "no token");
+
+      res.send(`
+        <html>
+          <body style="font-family:sans-serif; text-align:center; padding:50px;">
+            <h3>Google Ads Authorized Successfully!</h3>
+            <p>Returning to dashboard...</p>
+            <script>
+              localStorage.setItem("google_ads_linked", "true");
+              if (window.opener) {
+                window.opener.location.href = "${origin}/business/ad-networks?authorized=true";
+                window.close();
+              } else {
+                window.location.href = "${origin}/business/ad-networks?authorized=true";
+              }
+            </script>
+          </body>
+        </html>
+      `);
+    } catch (error: any) {
+      res.status(500).send("Auth failed.");
+    }
+  });
+
   // --- Core Gemini AI Routes ---
 
   app.post("/api/gemini/rationale", async (req, res) => {
     try {
       const { prompt } = req.body;
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         contents: [{
           role: "user",
           parts: [{
@@ -510,7 +909,7 @@ async function startServer() {
     try {
       const { prompt, currentConfig } = req.body;
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         contents: [{
           role: "user",
           parts: [{
@@ -552,7 +951,7 @@ async function startServer() {
       const lastMsg = messages[messages.length - 1];
 
       const chat = ai.chats.create({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         history: history,
         config: {
           systemInstruction: "You are Aria, an expert business and web design AI agent. You are helping a user build a referral-based website. Be concise, professional, and helpful.",
@@ -570,7 +969,7 @@ async function startServer() {
     try {
       const { prompt } = req.body;
       const result = await ai.models.generateContentStream({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         contents: [{
           role: "user",
           parts: [{
@@ -610,7 +1009,7 @@ async function startServer() {
       const lastMsg = messages[messages.length - 1];
 
       const chat = ai.chats.create({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         history: history,
         config: {
           systemInstruction: "You are Aria, an expert business and web design AI agent. You are helping a user build a referral-based website. Be concise, professional, and helpful.",

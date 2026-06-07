@@ -1,3 +1,7 @@
+import { auth, db } from "./firebaseService";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+
 export interface UserSession {
   isAuthenticated: boolean;
   email: string;
@@ -5,9 +9,11 @@ export interface UserSession {
   picture?: string;
   userType: "hustler" | "business";
   businessName?: string;
+  userId?: string;
+  referralCode?: string;
 }
 
-export async function getCurrentSession(): Promise<UserSession | null> {
+export async function getCurrentSession(retries = 2): Promise<UserSession | null> {
   try {
     const response = await fetch("/api/auth/me");
     if (!response.ok) return null;
@@ -17,28 +23,29 @@ export async function getCurrentSession(): Promise<UserSession | null> {
     }
     return null;
   } catch (error) {
+    if (retries > 0) {
+      // Add a small delay and retry to handle backend cold starts or race conditions
+      await new Promise(resolve => setTimeout(resolve, 800));
+      return getCurrentSession(retries - 1);
+    }
     console.error("Error getting session:", error);
     return null;
   }
 }
 
-export async function loginWithEmail(email: string, password: string): Promise<UserSession | null> {
-  try {
-    const response = await fetch("/api/auth/signin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!response.ok) return null;
-    const data = await response.json();
-    if (data.success && data.session) {
-      return data.session;
-    }
-    return null;
-  } catch (error) {
-    console.error("Login email error:", error);
-    return null;
+export async function loginWithEmail(email: string, password: string): Promise<UserSession> {
+  const response = await fetch("/api/auth/signin", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "Authentication failed. Please verify your email and password.");
   }
+  
+  return data.session;
 }
 
 export async function signupWithEmail(
@@ -50,23 +57,19 @@ export async function signupWithEmail(
     userType: "hustler" | "business";
     companyName?: string;
   }
-): Promise<UserSession | null> {
-  try {
-    const response = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) return null;
-    const data = await response.json();
-    if (data.success && data.session) {
-      return data.session;
-    }
-    return null;
-  } catch (error) {
-    console.error("Signup email error:", error);
-    return null;
+): Promise<UserSession> {
+  const response = await fetch("/api/auth/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "Failed to create account. Please try again.");
   }
+  
+  return data.session;
 }
 
 export async function logout(): Promise<boolean> {
@@ -85,107 +88,131 @@ export async function logout(): Promise<boolean> {
   localStorage.removeItem("representativeName");
   localStorage.removeItem("userEmail");
   localStorage.removeItem("userPicture");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("referralCode");
   
   return true;
 }
 
 export function openGoogleAuthPopup(
   role: "hustler" | "business" | "general",
-  onComplete: (session: UserSession) => void
+  onComplete: (session: UserSession) => void,
+  onError?: (errMessage: string) => void
 ) {
-  const origin = window.location.origin;
-  const url = `/api/auth/google/url?origin=${encodeURIComponent(origin)}&role=${role}`;
-  
-  const width = 600;
-  const height = 700;
-  const left = window.screenX + (window.outerWidth - width) / 2;
-  const top = window.screenY + (window.outerHeight - height) / 2;
-  
-  const popup = window.open(
-    "",
-    "google_oauth_popup",
-    `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes,scrollbars=yes`
-  );
+  const provider = new GoogleAuthProvider();
+  provider.addScope("email");
+  provider.addScope("profile");
 
-  if (!popup) {
-    alert("Please allow popups to sign in with Google.");
-    return;
-  }
+  signInWithPopup(auth, provider)
+    .then(async (result) => {
+      const user = result.user;
+      const email = user.email || "";
+      const name = user.displayName || email.split("@")[0];
+      const picture = user.photoURL || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(email)}`;
+      const uid = user.uid;
 
-  popup.document.write(`
-    <html>
-      <head>
-        <title>Connecting to Google...</title>
-        <style>
-          body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-            background: #ffffff; 
-            color: #222325; 
-          }
-          .loader { 
-            border: 3px solid #f3f3f3; 
-            border-top: 3px solid #1dbf73; 
-            border-radius: 50%; 
-            width: 28px; 
-            height: 28px; 
-            animation: spin 0.8s linear infinite; 
-            margin: 0 auto 16px auto; 
-          }
-          @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
-          }
-          .container { 
-            text-align: center; 
-          }
-          .text {
-            font-size: 15px;
-            font-weight: 500;
-            color: #404145;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="loader"></div>
-          <div class="text">Connecting to Google...</div>
-        </div>
-      </body>
-    </html>
-  `);
+      // Determine the userType/role – defaulting to specified or "hustler" if general
+      let finalRole: "hustler" | "business" = role === "general" ? "hustler" : role;
 
-  fetch(url)
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.url) {
-        popup.location.href = data.url;
-      } else {
-        popup.close();
-        alert("Authentication failed to initialize on the server.");
+      try {
+        const userDocRef = doc(db, "users", uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          if (userData.userType) {
+            // Check for role crossover conflict on the client if already in Firestore
+            if (role !== "general" && userData.userType !== role) {
+              const targetRoleNode = role === "hustler" ? "Hustler" : "Business";
+              const currentRoleNode = userData.userType === "hustler" ? "Hustler" : "Business";
+              const errMessage = `You already have an account as a ${currentRoleNode} under this email. You cannot register as a ${targetRoleNode}.`;
+              
+              if (onError) {
+                onError(errMessage);
+              } else {
+                alert(errMessage);
+              }
+              await auth.signOut();
+              return;
+            }
+            finalRole = userData.userType;
+          }
+        }
+      } catch (err) {
+        console.warn("Firestore user profile collection lookup failed, continuing with other validation layers:", err);
       }
+
+      // Sync backend cookie session with server to complete full-stack login
+      try {
+        const response = await fetch("/api/auth/firebase-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            name,
+            picture,
+            uid,
+            userType: finalRole,
+            targetRole: role
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          if (errData.error === "ROLE_CONFLICT" || errData.message) {
+            const errMsg = errData.message || `A role conflict was detected for this account.`;
+            if (onError) {
+              onError(errMsg);
+            } else {
+              alert(errMsg);
+            }
+            await auth.signOut();
+            return;
+          }
+        }
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.session) {
+            // New user registration - save to Firestore database under /users/{userId} if not already exists
+            try {
+              const userDocRef = doc(db, "users", uid);
+              const userDocSnap = await getDoc(userDocRef);
+              if (!userDocSnap.exists()) {
+                await setDoc(userDocRef, {
+                  userId: uid,
+                  email: email,
+                  userType: finalRole
+                });
+              }
+            } catch (fsErr) {
+              console.warn("Error creating user profile inside Firestore:", fsErr);
+            }
+            
+            onComplete(data.session);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to sync firebase login session to backend:", err);
+      }
+
+      // Safe local session fallback in case backend API doesn't mount instantly
+      const fallbackSession: UserSession = {
+        isAuthenticated: true,
+        email,
+        name,
+        picture,
+        userType: finalRole
+      };
+      onComplete(fallbackSession);
     })
-    .catch((err) => {
-      console.warn("Error fetching google auth URL, falling back dynamically on client:", err);
-      // Direct client fallback to same-origin mock login to avoid blocking in sandbox / restricted fetch environments
-      const mockLoginUrl = `${origin}/auth/google/mock-login?origin=${encodeURIComponent(origin)}&role=${role}`;
-      popup.location.href = mockLoginUrl;
+    .catch((error) => {
+      console.error("Firebase Auth sign-in error:", error);
+      if (onError) {
+        onError("Firebase Google Sign-In failed: " + (error as Error).message);
+      } else {
+        alert("Firebase Google Sign-In failed: " + (error as Error).message);
+      }
     });
-
-  const handleMessage = (event: MessageEvent) => {
-    const originUrl = event.origin;
-    if (!originUrl.endsWith(".run.app") && !originUrl.includes("localhost")) {
-      return;
-    }
-    if (event.data?.type === "OAUTH_AUTH_SUCCESS" && event.data.session) {
-      window.removeEventListener("message", handleMessage);
-      onComplete(event.data.session);
-    }
-  };
-
-  window.addEventListener("message", handleMessage);
 }

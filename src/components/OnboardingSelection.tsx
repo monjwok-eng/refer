@@ -1,156 +1,155 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Navbar from "./Navbar";
+import { motion } from "motion/react";
+import logoIcon from "../assets/images/ChatGPT Image Jun 1, 2026, 01_07_17 AM.png";
+import LoadingScreen from "./LoadingScreen";
 
 export default function OnboardingSelection() {
   const navigate = useNavigate();
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleRoleSelection = (selectedRole: "client" | "freelancer") => {
-    if (selectedRole === "client") {
-      navigate("/signup/business");
-    } else {
-      navigate("/signup/hustler");
-    }
+    setIsNavigating(true);
+    setTimeout(() => {
+      if (selectedRole === "client") {
+        navigate("/signup/business");
+      } else {
+        navigate("/signup/hustler");
+      }
+    }, 1000);
   };
 
-  return (
-    <div className="min-h-screen bg-white font-sans flex flex-col items-center">
-      <Navbar variant="skinny" showLoginLink={true} />
+  if (isNavigating) {
+    return <LoadingScreen text="Preparing your onboarding experience..." />;
+  }
 
-      <main className="flex-1 w-full flex flex-col items-center justify-center pt-[100px] md:pt-[80px] py-8 md:py-12 px-4 md:px-6">
-        <div className="w-full max-w-[800px]">
-          <div className="text-center mb-8 md:mb-12">
-            <h1 className="text-[28px] md:text-[32px] font-bold text-[#404145] mb-4 tracking-tight leading-tight md:leading-normal">
-              Join the Referr ecosystem
-            </h1>
+  return (
+    <div className="relative min-h-screen w-full flex flex-row justify-center items-center pt-14 pb-14 px-6 sm:px-10 bg-[#FAFAFA] overflow-hidden">
+      {/* Honeycomb Geometric Background Pattern */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.04] sm:opacity-[0.05] select-none z-0">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="honeycomb-join" width="56" height="97" patternUnits="userSpaceOnUse" patternTransform="scale(0.85)">
+              <path d="M28 0 L56 16.16 L56 48.5 L28 64.66 L0 48.5 L0 16.16 Z" fill="none" stroke="#000000" strokeWidth="1.2" />
+              <path d="M28 48.5 L56 64.66 L56 97 L28 113.16 L0 97 L0 64.66 Z" fill="none" stroke="#000000" strokeWidth="1.2" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#honeycomb-join)" />
+        </svg>
+      </div>
+
+      {/* Soft warm/pink gradient glow behind the card for visual depth */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-[#F092DD]/5 to-transparent blur-[120px] rounded-full pointer-events-none z-0" />
+
+      <div className="flex flex-row items-center z-10 w-full max-w-[640px]">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full flex flex-col items-center gap-6"
+        >
+          {/* Exact custom black SVG logo */}
+          <div className="flex justify-center items-center select-none">
+            <img
+              src={logoIcon}
+              alt="Referr Icon"
+              className="h-32 w-32 object-contain scale-[1.2]"
+              referrerPolicy="no-referrer"
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-12">
-            {/* Client Option */}
+          {/* Heading */}
+          <div className="text-center flex flex-col space-y-1.5 w-full">
+            <h4 className="text-2xl text-gray-950 font-semibold tracking-tight">
+              Join referr
+            </h4>
+            <p className="text-sm text-gray-500 max-w-sm mx-auto">
+              Select how you want to participate in the referrals ecosystem and unlock premium opportunities.
+            </p>
+          </div>
+
+          {/* Role Choice Cards */}
+          <div className="w-full flex flex-col gap-4">
+            
+            {/* Business Card Button */}
             <button
               onClick={() => handleRoleSelection("client")}
-              className="relative flex flex-col p-6 md:p-8 border border-[#c5c6c9] hover:border-[#1dbf73] transition-colors text-left rounded-[4px] group bg-white cursor-pointer shadow-sm hover:shadow-md"
+              className="group relative flex flex-row items-center gap-5 p-5 border border-gray-200 hover:border-[#ec4899] bg-white transition-all text-left rounded-lg cursor-pointer shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-md hover:-translate-y-0.5"
             >
-              <div className="flex flex-col md:h-full">
-                <div className="mb-4 md:mb-6 self-start text-[#404145] group-hover:text-[#1dbf73] transition-colors">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                    data-name="Layer 1"
-                    viewBox="0 0 24 24"
-                    role="img"
-                    width="40"
-                    height="40"
-                  >
-                    <path
-                      fill="none"
-                      vectorEffect="non-scaling-stroke"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.5"
-                      d="M19.28 21h-6.9a1.6 1.6 0 01-1.73-1.5v-4a1.6 1.6 0 011.73-1.5h6.9A1.59 1.59 0 0121 15.5v4a1.66 1.66 0 01-1.72 1.5z"
-                    ></path>
-                    <path
-                      fill="none"
-                      vectorEffect="non-scaling-stroke"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.5"
-                      d="M16.9 12h-2.15a.65.65 0 00-.72.66V14h3.59v-1.34a.65.65 0 00-.72-.66z"
-                    ></path>
-                    <line
-                      x1="10.65"
-                      x2="21"
-                      y1="17.29"
-                      y2="17.29"
-                      fill="none"
-                      vectorEffect="non-scaling-stroke"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.5"
-                    ></line>
-                    <circle
-                      cx="10.04"
-                      cy="5.73"
-                      r="2.73"
-                      fill="none"
-                      vectorEffect="non-scaling-stroke"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.5"
-                    ></circle>
-                    <path
-                      fill="none"
-                      vectorEffect="non-scaling-stroke"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.5"
-                      d="M3 18.45v-.9a7 7 0 017-7h.09a6.73 6.73 0 011.91.27"
-                    ></path>
-                  </svg>
-                </div>
-                <div className="mt-4 flex flex-col flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-[18px] md:text-[20px] font-bold text-[#404145] leading-tight">
-                      I'm a business, hiring trusted experts
-                    </h3>
-                  </div>
-                  <p className="text-[13px] md:text-[14px] text-[#62646a] font-medium leading-relaxed flex-1">
-                    Source and hire talent backed by professional referrals and
-                    verified track records.
-                  </p>
-                </div>
+              <div className="flex-shrink-0 bg-pink-50 p-3 rounded-md text-[#ec4899] group-hover:scale-105 transition-transform">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="w-6 h-6"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div className="flex-grow">
+                <h3 className="text-base font-semibold text-gray-950 group-hover:text-[#ec4899] transition-colors">
+                  I'm a business hiring experts
+                </h3>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Source and hire vetted talent backed by certified track records and verified professional references.
+                </p>
+              </div>
+              <div className="flex-shrink-0 text-gray-300 group-hover:text-[#ec4899] transition-colors pr-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
               </div>
             </button>
 
-            {/* Freelancer Option */}
+            {/* Hustler/Expert Card Button */}
             <button
               onClick={() => handleRoleSelection("freelancer")}
-              className="relative flex flex-col p-6 md:p-8 border border-[#c5c6c9] hover:border-[#1dbf73] transition-colors text-left rounded-[4px] group bg-white cursor-pointer shadow-sm hover:shadow-md"
+              className="group relative flex flex-row items-center gap-5 p-5 border border-gray-200 hover:border-[#ec4899] bg-white transition-all text-left rounded-lg cursor-pointer shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-md hover:-translate-y-0.5"
             >
-              <div className="flex flex-col h-full">
-                <div className="mb-4 md:mb-6 self-start text-[#404145] group-hover:text-[#1dbf73] transition-colors">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    role="img"
-                    width="40"
-                    height="40"
-                  >
-                    <path
-                      vectorEffect="non-scaling-stroke"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.5"
-                      d="M9.43 21H5.99M3 18.45v-.9a7 7 0 017-7h.09a6.94 6.94 0 013.79 1.12m5.5 9.33h-11L10 14h11l-1.62 7zm-4.69-3a.5.5 0 100-1 .5.5 0 000 1zM12.77 5.73a2.73 2.73 0 11-5.46 0 2.73 2.73 0 015.46 0z"
-                    ></path>
-                  </svg>
-                </div>
-                <div className="mt-4 flex flex-col flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-[18px] md:text-[20px] font-bold text-[#404145] leading-tight">
-                      I'm an expert, looking to join a referral network
-                    </h3>
-                  </div>
-                  <p className="text-[13px] md:text-[14px] text-[#62646a] font-medium leading-relaxed flex-1">
-                    Build your professional reputation, get referred for
-                    top-tier work, and earn more.
-                  </p>
-                </div>
+              <div className="flex-shrink-0 bg-pink-50 p-3 rounded-md text-[#ec4899] group-hover:scale-105 transition-transform">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="w-6 h-6"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="flex-grow">
+                <h3 className="text-base font-semibold text-gray-950 group-hover:text-[#ec4899] transition-colors">
+                  I'm an expert looking to join
+                </h3>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Join our elite network of professional referrers, claim premium engagements, and boost your personal tier.
+                </p>
+              </div>
+              <div className="flex-shrink-0 text-gray-300 group-hover:text-[#ec4899] transition-colors pr-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
               </div>
             </button>
+            
           </div>
-        </div>
-      </main>
+
+          {/* Underlined custom links aligned below */}
+          <div className="flex flex-col text-center space-y-6 w-full mt-2">
+            <span className="text-sm text-gray-500 font-normal">
+              Already have a referr account?{" "}
+              <Link
+                to="/signin"
+                className="text-[#ec4899] hover:text-[#db2777] underline font-semibold transition-colors"
+              >
+                Log in
+              </Link>
+            </span>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }

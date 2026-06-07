@@ -107,16 +107,15 @@ export default function SiteMobileApp() {
                       exit={{ opacity: 0, scale: 0.95, y: -10 }}
                       className="absolute right-0 left-0 md:left-auto md:w-52 mt-2 bg-white border border-gray-200 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] z-50 overflow-hidden"
                     >
-                      <button 
-                        onClick={() => {
-                          localStorage.setItem("simulated_subdomain", publishedSlug);
-                          window.location.href = "/";
-                        }}
+                      <a 
+                        href={`https://${publishedSlug}.referr.me`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="w-full text-left px-5 py-4 md:py-3 hover:bg-gray-50 text-[14px] font-bold text-[#222325] flex items-center justify-between border-b border-gray-50 md:border-none transition-colors"
                       >
                         View Site
                         <ExternalLink size={14} className="text-gray-400" />
-                      </button>
+                      </a>
                       <button 
                         onClick={handleUnpublish}
                         className="w-full text-left px-5 py-4 md:py-3 hover:bg-gray-50 text-[14px] font-bold text-[#222325] transition-colors"
@@ -139,7 +138,7 @@ export default function SiteMobileApp() {
           {hasSite && (
             <button 
               onClick={() => navigate("/editor")}
-              className="flex-1 md:flex-none h-[48px] md:h-9 px-6 md:px-5 py-2 bg-[#1dbf73] text-white rounded text-[14px] font-black hover:bg-[#19a463] transition-colors flex items-center justify-center md:justify-start gap-2 shadow-md active:scale-95"
+              className="flex-1 md:flex-none h-[48px] md:h-9 px-6 md:px-5 py-2 bg-[#ec4899] text-white rounded text-[14px] font-black hover:bg-[#db2777] transition-colors flex items-center justify-center md:justify-start gap-2 shadow-md active:scale-95"
             >
               <PenTool size={14} strokeWidth={3} />
               Edit
@@ -161,7 +160,7 @@ export default function SiteMobileApp() {
                     <div className="h-5 bg-gray-50 border-b border-gray-200 px-2.5 flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-full bg-red-400 opacity-60"></div>
                       <div className="w-2 h-2 rounded-full bg-amber-400 opacity-60"></div>
-                      <div className="w-2 h-2 rounded-full bg-green-400 opacity-60"></div>
+                      <div className="w-2 h-2 rounded-full bg-pink-400 opacity-60"></div>
                     </div>
                     <div className="p-4">
                       <div className="w-2/3 h-3 bg-gray-100 rounded mb-4"></div>
@@ -181,15 +180,6 @@ export default function SiteMobileApp() {
                       <h3 className="text-[22px] md:text-2xl font-black text-[#222325] tracking-tight truncate">
                         {businessName}
                       </h3>
-                      <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-50 rounded-sm border border-emerald-100 shrink-0">
-                        <span className="relative flex h-2.5 w-2.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1dbf73] opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#1dbf73]"></span>
-                        </span>
-                        <span className="text-[11px] font-black text-[#1dbf73] uppercase tracking-widest">
-                          Live
-                        </span>
-                      </div>
                     </div>
                   </div>
 
@@ -198,7 +188,7 @@ export default function SiteMobileApp() {
                       <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Plan</span>
                       <div className="flex items-center gap-2">
                           <span className="font-black">Free</span>
-                          <button className="text-[#1dbf73] hover:underline font-black">
+                          <button className="text-[#ec4899] hover:underline font-black">
                             Upgrade
                           </button>
                       </div>
@@ -210,13 +200,10 @@ export default function SiteMobileApp() {
                       <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Domain</span>
                       <div className="flex items-center gap-3 min-w-0">
                           <a
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              localStorage.setItem("simulated_subdomain", publishedSlug);
-                              window.location.href = "/";
-                            }}
-                            className="text-gray-800 hover:underline flex items-center gap-2 font-black truncate max-w-[140px] md:max-w-none"
+                            href={`https://${publishedSlug}.referr.me`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-gray-800 hover:underline flex items-center gap-2 font-black truncate text-left max-w-[140px] md:max-w-none"
                           >
                             {siteUrl.replace('https://', '')}
                             <ExternalLink size={14} className="text-gray-400 shrink-0" />
@@ -228,7 +215,7 @@ export default function SiteMobileApp() {
 
                     <div className="flex items-center justify-between md:justify-start gap-4 min-w-[160px] w-full md:w-auto">
                       <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Email</span>
-                      <button className="text-[#1dbf73] hover:underline font-black">
+                      <button className="text-[#ec4899] hover:underline font-black">
                         Manage
                       </button>
                     </div>
@@ -244,10 +231,10 @@ export default function SiteMobileApp() {
             <div className="bg-white rounded-lg border border-gray-200 p-5 md:p-6 flex flex-col h-[200px] md:h-[220px] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
               <div className="flex items-center justify-between mb-4">
                   <h4 className="font-semibold text-[#222325] text-sm md:text-base flex items-center gap-2">
-                    <Activity size={16} className="text-[#1dbf73]" />
+                    <Activity size={16} className="text-[#ec4899]" />
                     Visitors (Last 7 Days)
                   </h4>
-                  <span className="text-[10px] md:text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded flex items-center gap-1">
+                  <span className="text-[10px] md:text-xs font-bold text-pink-600 bg-pink-50 px-2 py-1 rounded flex items-center gap-1">
                       <ArrowUpRight size={12} />
                       +12%
                   </span>
@@ -258,7 +245,7 @@ export default function SiteMobileApp() {
                     <BarChart data={trafficData}>
                       <Bar dataKey="visitors" radius={[2, 2, 0, 0]}>
                         {trafficData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={index === trafficData.length - 1 ? "#1dbf73" : "#e2e8f0"} />
+                            <Cell key={`cell-${index}`} fill={index === trafficData.length - 1 ? "#ec4899" : "#e2e8f0"} />
                         ))}
                       </Bar>
                       <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{fontSize: '12px', padding: '8px', borderRadius: '4px', border: '1px solid #e2e8f0'}}/>
@@ -295,7 +282,7 @@ export default function SiteMobileApp() {
                 </div>
               </div>
               <div className="mt-6 md:mt-auto pt-4 relative z-10 w-full border-t border-gray-50">
-                <button className="text-[12px] md:text-[13px] font-medium text-[#222325] hover:text-[#1dbf73] transition-colors hover:underline">
+                <button className="text-[12px] md:text-[13px] font-medium text-[#222325] hover:text-[#ec4899] transition-colors hover:underline">
                   View full report
                 </button>
               </div>
@@ -316,7 +303,7 @@ export default function SiteMobileApp() {
           </p>
           <button 
             onClick={() => navigate("/create-site")}
-            className="w-full md:w-auto h-11 px-8 bg-[#1dbf73] text-white rounded font-bold hover:bg-[#19a463] transition-colors shadow-sm active:scale-95"
+            className="w-full md:w-auto h-11 px-8 bg-[#ec4899] text-white rounded font-bold hover:bg-[#db2777] transition-colors shadow-sm active:scale-95"
           >
             Create Site Now
           </button>

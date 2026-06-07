@@ -34,6 +34,40 @@ import PublishModal from "./PublishModal";
 import { generateSiteRationale, continueChat, generateSiteUpdate } from "../services/geminiService";
 import { SiteConfig, DEFAULT_CONFIGS, BLANK_CONFIG } from "../types/site";
 
+const ArialAvatar = ({ size = 32 }: { size?: number }) => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // Scale dynamic eye range based on coordinate calculations
+      const x = (e.clientX / window.innerWidth - 0.5) * (size * 0.5);
+      const y = (e.clientY / window.innerHeight - 0.5) * (size * 0.35);
+      setMousePos({ x, y });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [size]);
+
+  const eyeSize = size >= 40 ? "w-[5px] h-[5px]" : size >= 32 ? "w-[4px] h-[4px]" : "w-[2.5px] h-[2.5px]";
+  const gapSize = size >= 40 ? "gap-2" : "gap-1.5";
+
+  return (
+    <div className="relative shrink-0 select-none pointer-events-none" style={{ width: size, height: size }}>
+      <div className="absolute inset-0 bg-[#222325] rounded-full overflow-hidden shadow-md flex items-center justify-center border border-slate-700">
+        <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-white/10" />
+        <motion.div
+          className={`flex ${gapSize} relative z-10`}
+          animate={{ x: mousePos.x, y: mousePos.y }}
+          transition={{ type: "spring", stiffness: 450, damping: 25 }}
+        >
+          <div className={`${eyeSize} bg-white rounded-full shadow-[0_0_4px_white]`} />
+          <div className={`${eyeSize} bg-white rounded-full shadow-[0_0_4px_white]`} />
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
 const TEMPLATES: Record<number, React.ComponentType<{config?: SiteConfig}>> = {
   1: MinimalAgency,
   2: ProfessionalServices,
@@ -55,7 +89,7 @@ export default function SiteEditorPage() {
   const [showSpinner, setShowSpinner] = useState(true);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
-  const [activeLeftTab, setActiveLeftTab] = useState("add");
+  const [activeLeftTab, setActiveLeftTab] = useState("");
   const [activeMobileView, setActiveMobileView] = useState<"chat" | "preview">("chat");
   
   // Site Config State
@@ -146,7 +180,7 @@ export default function SiteEditorPage() {
           const fallbackUpdate: Partial<SiteConfig> = {
             brand: {
               name: bizName.toUpperCase(),
-              accentColor: baseTemplate.brand?.accentColor || "#1dbf73",
+              accentColor: baseTemplate.brand?.accentColor || "#ec4899",
               tagline: "Professional Referral Hub"
             },
             hero: {
@@ -183,14 +217,17 @@ export default function SiteEditorPage() {
           setIsProcessingChat(false);
           setIsAiBuilding(false);
         }
-      } else {
+       } else {
         // Initial AI-driven greeting if no prompt
         try {
-          const greeting = await continueChat([{ role: 'user', text: "Hello Aria. Tell the user that you are now online, powered by Gemini 1.5 Flash, and ask what they would like to build." }]);
+          const userName = localStorage.getItem("businessName") || localStorage.getItem("representativeName") || localStorage.getItem("hustlerName") || "Partner";
+          const userUid = localStorage.getItem("userId") || "USR-UNKNOWN";
+          const greeting = await continueChat([{ role: 'user', text: `Hello Arial. Establish design session for active partner: "${userName}" (Unique ID: ${userUid}). Welcome them, tell them you are now online and ready to build their referral site, and address them by their name/brand!` }]);
           setChatMessages([{ role: 'assistant', text: greeting }]);
         } catch (e) {
           console.error("Failed to start chat:", e);
-          setChatMessages([{ role: 'assistant', text: "Hello! I am Aria, your AI partner. How can I assist you with customizing your professional referral website or designing campaigns today?" }]);
+          const userName = localStorage.getItem("businessName") || localStorage.getItem("hustlerName") || "Partner";
+          setChatMessages([{ role: 'assistant', text: `Hello ${userName}! I am Arial, your AI partner. How can I assist you with customizing your professional referral website or designing campaigns today?` }]);
         }
       }
       setShowSpinner(false);
@@ -262,14 +299,14 @@ export default function SiteEditorPage() {
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#fdfdfd] z-50">
         <div className="relative flex items-center justify-center">
           <div className="w-16 h-16 border border-slate-200 rounded-full animate-ping absolute"></div>
-          <div className="w-8 h-8 border-2 border-slate-200 border-t-emerald-500 rounded-full animate-spin relative z-10"></div>
-          <div className="w-12 h-12 bg-emerald-500/10 rounded-full absolute blur-xl"></div>
+          <div className="w-8 h-8 border-2 border-slate-200 border-t-pink-500 rounded-full animate-spin relative z-10"></div>
+          <div className="w-12 h-12 bg-pink-500/10 rounded-full absolute blur-xl"></div>
         </div>
         <div className="mt-8 flex flex-col items-center">
           <h2 className="text-slate-800 font-medium tracking-wide text-sm font-mono uppercase">Initializing Workspace</h2>
           <div className="flex gap-1 mt-3">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="w-1 h-1 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }}></div>
+              <div key={i} className="w-1 h-1 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }}></div>
             ))}
           </div>
         </div>
@@ -278,7 +315,7 @@ export default function SiteEditorPage() {
   }
 
   return (
-    <div className="fixed inset-0 bg-[#f4f5f6] text-slate-800 font-sans flex flex-col overflow-hidden selection:bg-emerald-500/30 selection:text-emerald-900">
+    <div className="fixed inset-0 bg-[#f4f5f6] text-slate-800 font-sans flex flex-col overflow-hidden selection:bg-pink-500/30 selection:text-pink-900">
       <PublishModal
         isOpen={isPublishModalOpen}
         onClose={() => setIsPublishModalOpen(false)}
@@ -365,15 +402,15 @@ export default function SiteEditorPage() {
           </div>
           <button 
             onClick={() => setIsPublishModalOpen(true)}
-            className="h-8 px-4 bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold rounded-md shadow-[0_2px_8px_rgba(16,185,129,0.25)] hover:shadow-[0_4px_12px_rgba(16,185,129,0.35)] transition-all active:scale-95"
+            className="h-8 px-4 bg-pink-500 hover:bg-pink-400 text-white text-xs font-bold rounded-md shadow-[0_2px_8px_rgba(236,72,153,0.25)] hover:shadow-[0_4px_12px_rgba(236,72,153,0.35)] transition-all active:scale-95"
           >
             Deploy
           </button>
           <button 
             onClick={() => setIsAiSidebarOpen(!isAiSidebarOpen)}
-            className={`h-8 w-8 rounded-md flex items-center justify-center transition-all ${isAiSidebarOpen ? "bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm" : "bg-white border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 shadow-sm"}`}
+            className={`h-8 w-8 rounded-md flex items-center justify-center transition-all ${isAiSidebarOpen ? "bg-pink-50 text-pink-600 border border-pink-200 shadow-sm" : "bg-white border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 shadow-sm"}`}
           >
-            <Bot size={16} />
+            <ArialAvatar size={20} />
           </button>
         </div>
       </header>
@@ -420,42 +457,7 @@ export default function SiteEditorPage() {
       {/* Main Workspace */}
       <div className="flex-1 flex overflow-hidden">
         
-        {/* Left Toolbar - Icon Only (Hidden on Mobile) */}
-        <aside className="hidden md:flex w-14 bg-white border-r border-slate-200 flex-col items-center py-4 z-20 shrink-0 shadow-[2px_0_12px_rgba(0,0,0,0.02)]">
-          <div className="flex flex-col gap-3">
-            {[
-              { id: 'add', icon: Plus, tooltip: 'Add Elements' },
-              { id: 'pages', icon: LayoutTemplate, tooltip: 'Pages & Layers' },
-              { id: 'styles', icon: Palette, tooltip: 'Global Styles' },
-              { id: 'media', icon: ImageIcon, tooltip: 'Media Library' },
-              { id: 'code', icon: Code, tooltip: 'Custom Code' },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveLeftTab(prev => prev === item.id ? "" : item.id)}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all relative group ${
-                  activeLeftTab === item.id 
-                    ? "bg-slate-100 text-slate-800 border border-slate-200 shadow-sm" 
-                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                <item.icon size={18} strokeWidth={activeLeftTab === item.id ? 2 : 1.5} />
-                <div className="absolute left-[calc(100%+8px)] px-2 py-1 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded shadow-xl opacity-0 -translate-x-2 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all whitespace-nowrap z-50">
-                  {item.tooltip}
-                </div>
-              </button>
-            ))}
-          </div>
-          
-          <div className="mt-auto flex flex-col gap-3">
-            <button className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all">
-              <Settings size={18} />
-            </button>
-            <button className="w-10 h-10 rounded-full bg-slate-100 border-2 border-slate-200 overflow-hidden mt-2 p-0 flex items-center justify-center text-[10px] font-bold text-slate-500 shadow-sm">
-              JS
-            </button>
-          </div>
-        </aside>
+
 
         {/* Side Panel for Tabs */}
         <AnimatePresence>
@@ -468,20 +470,300 @@ export default function SiteEditorPage() {
             >
               <div className="h-14 border-b border-slate-100 flex items-center justify-between px-5 shrink-0">
                 <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">
-                  {activeLeftTab === 'code' ? 'Custom Code' : activeLeftTab}
+                  {activeLeftTab === 'code' ? 'Custom Code' : activeLeftTab === 'styles' ? 'Global Styles' : activeLeftTab === 'add' ? 'Add Elements' : activeLeftTab === 'pages' ? 'Pages & Layers' : activeLeftTab === 'media' ? 'Media Library' : activeLeftTab}
                 </h3>
                 <button onClick={() => setActiveLeftTab("")} className="text-slate-400 hover:text-slate-600">
                   <X size={16} />
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-5">
-                {activeLeftTab === 'code' ? (
+                {activeLeftTab === 'styles' ? (
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        COMPOSITION HARMONY
+                      </h4>
+                      <p className="text-[12px] text-slate-500 leading-relaxed mb-4">
+                        Visualizing the brand color composition of the active blueprint template. Edit below to override!
+                      </p>
+                      
+                      <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-4 h-4 rounded-full border border-slate-200 shadow-sm" style={{ backgroundColor: siteConfig.brand.accentColor || "#ec4899" }} />
+                            <span className="text-xs font-semibold text-slate-700">Brand Accent</span>
+                          </div>
+                          <span className="text-[11px] font-mono text-slate-400 font-bold uppercase">{siteConfig.brand.accentColor || "#ec4899"}</span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-4 h-4 rounded-full border border-slate-200 shadow-sm" style={{ backgroundColor: siteConfig.brand.backgroundColor || (templateId === 3 ? "#0a0a0a" : templateId === 2 ? "#fcfdfe" : "#ffffff") }} />
+                            <span className="text-xs font-semibold text-slate-700">Canvas Base</span>
+                          </div>
+                          <span className="text-[11px] font-mono text-slate-400 font-bold uppercase">
+                            {siteConfig.brand.backgroundColor || (templateId === 3 ? "#0a0a0a" : templateId === 2 ? "#fcfdfe" : "#ffffff")}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: templateId === 3 ? "#ffffff" : "#0f172a" }} />
+                            <span className="text-xs font-semibold text-slate-700">Primary Slate</span>
+                          </div>
+                          <span className="text-[11px] font-mono text-slate-400 font-bold uppercase">{templateId === 3 ? "#FFFFFF" : "#0F172A"}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                        BRAND ACCENT COLOR
+                      </h4>
+                      <div className="flex gap-2.5 items-center">
+                        <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-slate-200 shadow-sm shrink-0">
+                          <input 
+                            type="color" 
+                            value={siteConfig.brand.accentColor || "#ec4899"} 
+                            onChange={(e) => {
+                              setSiteConfig(prev => ({
+                                ...prev,
+                                brand: {
+                                  ...prev.brand,
+                                  accentColor: e.target.value
+                                }
+                              }));
+                            }}
+                            className="absolute -inset-2 w-14 h-14 cursor-pointer p-0 border-none bg-transparent"
+                          />
+                        </div>
+                        <input 
+                          type="text" 
+                          value={siteConfig.brand.accentColor || ""} 
+                          onChange={(e) => {
+                            setSiteConfig(prev => ({
+                              ...prev,
+                              brand: {
+                                ...prev.brand,
+                                accentColor: e.target.value
+                              }
+                            }));
+                          }}
+                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-slate-300 transition-colors uppercase"
+                          placeholder="#ec4899"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-6 gap-2 pt-2">
+                        {[
+                          { name: 'Pink', hex: '#ec4899' },
+                          { name: 'Royal', hex: '#3b82f6' },
+                          { name: 'Neon Pink', hex: '#ec4899' },
+                          { name: 'Amethyst', hex: '#8b5cf6' },
+                          { name: 'Solar', hex: '#f59e0b' },
+                          { name: 'Crimson', hex: '#ef4444' }
+                        ].map((swatch) => (
+                          <button
+                            key={swatch.hex}
+                            onClick={() => {
+                              setSiteConfig(prev => ({
+                                ...prev,
+                                brand: {
+                                  ...prev.brand,
+                                  accentColor: swatch.hex
+                                }
+                              }));
+                            }}
+                            className={`w-full aspect-square rounded-lg border flex items-center justify-center transition-all ${
+                              siteConfig.brand.accentColor.toLowerCase() === swatch.hex.toLowerCase()
+                                ? 'border-slate-800 scale-105 shadow-sm ring-1 ring-slate-800'
+                                : 'border-slate-200 hover:scale-105'
+                            }`}
+                            style={{ backgroundColor: swatch.hex }}
+                            title={swatch.name}
+                          >
+                            {siteConfig.brand.accentColor.toLowerCase() === swatch.hex.toLowerCase() && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-white shadow-sm" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 pt-2">
+                      <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                        CANVAS BASE COLOR
+                      </h4>
+                      <div className="flex gap-2.5 items-center">
+                        <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-slate-200 shadow-sm shrink-0">
+                          <input 
+                            type="color" 
+                            value={siteConfig.brand.backgroundColor || (templateId === 3 ? "#0a0a0a" : templateId === 2 ? "#fcfdfe" : "#ffffff")} 
+                            onChange={(e) => {
+                              setSiteConfig(prev => ({
+                                ...prev,
+                                brand: {
+                                  ...prev.brand,
+                                  backgroundColor: e.target.value
+                                }
+                              }));
+                            }}
+                            className="absolute -inset-2 w-14 h-14 cursor-pointer p-0 border-none bg-transparent"
+                          />
+                        </div>
+                        <input 
+                          type="text" 
+                          value={siteConfig.brand.backgroundColor || (templateId === 3 ? "#0a0a0a" : templateId === 2 ? "#fcfdfe" : "#ffffff")} 
+                          onChange={(e) => {
+                            setSiteConfig(prev => ({
+                              ...prev,
+                              brand: {
+                                ...prev.brand,
+                                backgroundColor: e.target.value
+                              }
+                            }));
+                          }}
+                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-slate-300 transition-colors uppercase"
+                          placeholder="#ffffff"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 pt-2">
+                        {[
+                          { name: 'Fresh White', hex: '#ffffff' },
+                          { name: 'Warm Creame', hex: '#faf9f6' },
+                          { name: 'Stratos Soft', hex: '#fcfdfe' },
+                          { name: 'Cosmic Pitch', hex: '#0a0a0a' }
+                        ].map((swatch) => {
+                          const currentBg = siteConfig.brand.backgroundColor || (templateId === 3 ? "#0a0a0a" : templateId === 2 ? "#fcfdfe" : "#ffffff");
+                          return (
+                            <button
+                              key={swatch.hex}
+                              onClick={() => {
+                                setSiteConfig(prev => ({
+                                  ...prev,
+                                  brand: {
+                                    ...prev.brand,
+                                    backgroundColor: swatch.hex
+                                  }
+                                }));
+                              }}
+                              className={`w-full py-2.5 px-2 rounded-lg border text-[11px] font-bold transition-all text-slate-700 ${
+                                currentBg.toLowerCase() === swatch.hex.toLowerCase()
+                                  ? 'border-slate-950 bg-slate-50 font-black shadow-sm'
+                                  : 'border-slate-200 bg-white hover:bg-slate-50'
+                              }`}
+                              style={{ borderTopColor: swatch.hex, borderTopWidth: '4px' }}
+                              title={swatch.name}
+                            >
+                              <div className="truncate text-center">{swatch.name}</div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ) : activeLeftTab === 'add' ? (
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        ELEMENTS & VIEWS
+                      </h4>
+                      <p className="text-[12px] text-slate-500 leading-relaxed mb-4">
+                        Drag or click items below to submit layout blueprints directly to Arial for compilation.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      {[
+                        { title: 'Hero Headline Block', desc: 'Large title typography & introduction' },
+                        { title: 'Direct Call to Action Button', desc: 'Referral URL generation form widget' },
+                        { title: 'Affiliate Double Stats Grid', desc: 'Display statistics, metrics & multipliers' },
+                        { title: 'Commission Calculator Slider', desc: 'Compute commissions visually' },
+                        { title: 'Interactive Features Matrix', desc: 'Show advantages and rewards' }
+                      ].map((item) => (
+                        <button
+                          key={item.title}
+                          onClick={() => {
+                            setInputValue(`Add a beautiful, modular ${item.title.toLowerCase()} configured to increase customer conversions.`);
+                            setIsAiSidebarOpen(true);
+                          }}
+                          className="w-full text-left p-3 border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-colors group flex justify-between items-center"
+                        >
+                          <div>
+                            <div className="text-xs font-bold text-slate-800 group-hover:text-slate-950">{item.title}</div>
+                            <div className="text-[10px] text-slate-400 font-medium">{item.desc}</div>
+                          </div>
+                          <Plus size={14} className="text-slate-400 group-hover:text-slate-600 transition-colors shrink-0 ml-2" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : activeLeftTab === 'pages' ? (
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        PAGES & LAYERS
+                      </h4>
+                      <p className="text-[12px] text-slate-500 leading-relaxed mb-4">
+                        Current active components and pages associated with this project.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-pink-500 shadow-sm animate-pulse" />
+                          <span className="text-xs font-bold text-slate-800">Master Landing Page</span>
+                        </div>
+                        <span className="text-[10px] uppercase font-bold text-pink-600 bg-pink-50 px-2 py-0.5 rounded tracking-wider border border-pink-100">Live</span>
+                      </div>
+                      <div className="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between opacity-60">
+                        <span className="text-xs font-bold text-slate-500">Contact Campaign Brief</span>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded tracking-wider">Static</span>
+                      </div>
+                      <div className="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between opacity-60">
+                        <span className="text-xs font-bold text-slate-500">Affiliate Portal Logins</span>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded tracking-wider">Static</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : activeLeftTab === 'media' ? (
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        MEDIA LIBRARY
+                      </h4>
+                      <p className="text-[12px] text-slate-500 leading-relaxed mb-4">
+                        Curate or update visual assets retrieved dynamically inside your layout grids.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-2">
+                        <span className="text-xs font-bold text-slate-700">Photo Query Term</span>
+                        <input 
+                          type="text" 
+                          defaultValue="abstract, corporate, digital" 
+                          className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-slate-300"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=120&q=80',
+                          'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=120&q=80'
+                        ].map((img, i) => (
+                          <div key={i} className="aspect-video bg-slate-100 rounded-lg overflow-hidden border border-slate-200 relative group cursor-pointer">
+                            <img src={img} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : activeLeftTab === 'code' ? (
                   <div className="space-y-4">
                     <p className="text-[12px] text-slate-500 leading-relaxed font-medium">
-                      Aria generated React/TypeScript code for your site components.
+                      Arial generated React/TypeScript code for your site components.
                     </p>
                     <div className="bg-slate-900 rounded-lg p-4 overflow-x-auto">
-                      <pre className="text-[11px] font-mono text-emerald-400 leading-relaxed">
+                      <pre className="text-[11px] font-mono text-pink-400 leading-relaxed">
                         <code>
                           {siteConfig.customCode || `import React from 'react';
 import { motion } from 'framer-motion';
@@ -508,8 +790,8 @@ export const CustomHero = () => {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-slate-300 gap-4">
-                    <Bot size={32} />
-                    <span className="text-xs font-mono uppercase tracking-widest">Panel Under Construction</span>
+                    <ArialAvatar size={48} />
+                    <span className="text-xs font-mono uppercase tracking-widest">Select an Option</span>
                   </div>
                 )}
               </div>
@@ -542,7 +824,7 @@ export const CustomHero = () => {
                 </div>
                 <div className="flex-1 flex justify-center">
                   <div className="bg-white border border-slate-200 rounded-md px-16 py-1 text-[11px] font-mono text-slate-500 shadow-sm flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-sm bg-emerald-500/20 shadow-[0_0_8px_rgba(16,185,129,0.2)]"></span>
+                    <span className="w-2 h-2 rounded-sm bg-pink-500/20 shadow-[0_0_8px_rgba(16,185,129,0.2)]"></span>
                     sandbox.local/preview
                   </div>
                 </div>
@@ -565,7 +847,7 @@ export const CustomHero = () => {
                   <div className="w-full h-full bg-slate-50 flex items-center justify-center p-12 text-center">
                     <div className="max-w-md">
                       <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-200 mx-auto mb-6">
-                        <Sparkles className="text-emerald-500 animate-pulse" size={32} />
+                        <Sparkles className="text-pink-500 animate-pulse" size={32} />
                       </div>
                       <h3 className="text-slate-800 font-bold text-lg mb-2">Workspace Initialized</h3>
                       <p className="text-slate-500 text-sm leading-relaxed">
@@ -583,8 +865,10 @@ export const CustomHero = () => {
                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none bg-white/40 backdrop-blur-[2px]">
                   <div className="bg-white/95 border border-slate-200 p-6 rounded-2xl shadow-2xl backdrop-blur-xl flex flex-col items-center">
                      <div className="relative">
-                        <div className="w-12 h-12 border-2 border-slate-100 border-t-emerald-500 rounded-full animate-spin"></div>
-                        <Bot size={20} className="text-slate-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                        <div className="w-12 h-12 border-2 border-slate-100 border-t-pink-500 rounded-full animate-spin"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                          <ArialAvatar size={24} />
+                        </div>
                      </div>
                      <span className="text-slate-600 font-mono text-sm mt-4 tracking-wide font-medium">Compiling layout...</span>
                   </div>
@@ -604,16 +888,14 @@ export const CustomHero = () => {
           <div className="hidden md:flex h-14 px-5 border-b border-slate-100 items-center justify-between shrink-0 bg-white/95 backdrop-blur-md relative z-10 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-8 h-8 rounded-md bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500 shrink-0 shadow-[0_2px_4px_rgba(16,185,129,0.1)]">
-                  <Bot size={16} />
-                </div>
+                <ArialAvatar size={32} />
                 {isProcessingChat && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
                 )}
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                  Aria <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 font-semibold border border-emerald-200">Gemini 1.5 Flash</span>
+                  Arial
                 </h3>
               </div>
             </div>
@@ -630,8 +912,8 @@ export const CustomHero = () => {
             {chatMessages.map((msg, i) => (
                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-6 h-6 rounded bg-emerald-50 border border-emerald-100 md:flex hidden items-center justify-center shrink-0 mr-3 mt-1 shadow-sm">
-                    <Bot size={12} className="text-emerald-500" />
+                  <div className="mr-3 mt-1 shrink-0 md:block hidden">
+                    <ArialAvatar size={24} />
                   </div>
                 )}
                 <div 
@@ -648,8 +930,8 @@ export const CustomHero = () => {
 
             {isProcessingChat && (
               <div className="flex justify-start">
-                <div className="w-6 h-6 rounded bg-emerald-50 border border-emerald-100 md:flex hidden items-center justify-center shrink-0 mr-3 mt-1 shadow-sm">
-                  <Bot size={12} className="text-emerald-500/80" />
+                <div className="mr-3 mt-1 shrink-0 md:block hidden animate-pulse">
+                  <ArialAvatar size={24} />
                 </div>
                 <div className="bg-white border border-slate-200 px-4 py-4 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-[pulse_1s_infinite_0ms]"></span>
@@ -664,7 +946,7 @@ export const CustomHero = () => {
 
           {/* AI Chat Input - Tech Terminal Feel (Responsive) */}
           <div className="p-4 bg-white border-t border-slate-100 pb-10 md:pb-4">
-            <div className="relative group rounded-xl bg-slate-50 p-1 border border-slate-200 focus-within:border-emerald-400 focus-within:shadow-[0_0_0_4px_rgba(16,185,129,0.1)] transition-all">
+            <div className="relative group rounded-xl bg-slate-50 p-1 border border-slate-200 focus-within:border-pink-400 focus-within:shadow-[0_0_0_4px_rgba(16,185,129,0.1)] transition-all">
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -676,7 +958,7 @@ export const CustomHero = () => {
                 }}
                 disabled={isProcessingChat}
                 className="w-full bg-transparent p-3 pr-10 text-[15px] md:text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none min-h-[48px] md:min-h-[44px] resize-none"
-                placeholder={isProcessingChat ? "Analyzing request..." : "Instruct Aria..."}
+                placeholder={isProcessingChat ? "Analyzing request..." : "Instruct Arial..."}
                 rows={1}
               />
               <button 
@@ -685,14 +967,14 @@ export const CustomHero = () => {
                 className={`absolute right-2 bottom-2 w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
                   isProcessingChat || !inputValue.trim() 
                     ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
-                    : 'bg-emerald-500 text-white hover:bg-emerald-400 shadow-[0_2px_8px_rgba(16,185,129,0.3)] active:scale-95'
+                    : 'bg-pink-500 text-white hover:bg-pink-400 shadow-[0_2px_8px_rgba(16,185,129,0.3)] active:scale-95'
                 }`}
               >
                 <Send size={12} strokeWidth={2.5} className={inputValue.trim() && !isProcessingChat ? "translate-x-[1px] -translate-y-[-1px]" : ""} />
               </button>
             </div>
             <div className="flex justify-between items-center mt-3 px-1 opacity-60">
-               <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-semibold">Aria Copilot Mode</span>
+               <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-semibold">Arial Copilot Mode</span>
                <span className="text-[10px] text-slate-400 font-medium tracking-tight">Return to send</span>
             </div>
           </div>

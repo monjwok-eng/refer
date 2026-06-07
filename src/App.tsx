@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { getCurrentSession } from "./services/authService";
 import LandingPage from "./components/LandingPage";
+import BrandLandingPage from "./components/BrandLandingPage";
 import OnboardingSelection from "./components/OnboardingSelection";
 import HustlerSignup from "./components/HustlerSignup";
 import BusinessSignup from "./components/BusinessSignup";
@@ -21,15 +22,17 @@ import Profile from "./components/Profile";
 import Deals from "./components/Deals";
 import DealDetails from "./components/DealDetails";
 import SidebarLayout from "./components/SidebarLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import WelcomeOnboarding from "./components/WelcomeOnboarding";
 import SignIn from "./components/SignIn";
 import CookieConsent from "./components/CookieConsent";
 
 import CreateSitePage from "./components/CreateSitePage";
-import AriaDesignPage from "./components/AriaDesignPage";
+import ArialDesignPage from "./components/ArialDesignPage";
 import PostDealPage from "./components/PostDealPage";
 import PostBlogPage from "./components/PostBlogPage";
+import AdNetworksPage from "./components/AdNetworksPage";
 import AnalyticsPage from "./components/AnalyticsPage";
 import FavoritesPage from "./components/FavoritesPage";
 import ReferrersPage from "./components/ReferrersPage";
@@ -41,6 +44,12 @@ import SiteMobileApp from "./components/SiteMobileApp";
 import LiveSiteView from "./components/LiveSiteView";
 import { getSubdomain } from "./utils/subdomain";
 
+// Completely purge any old simulation tags immediately before anything renders to prevent browser hijacking 
+if (typeof window !== "undefined") {
+  localStorage.removeItem("simulated_subdomain");
+  localStorage.removeItem("user_published_slug");
+}
+
 import HireProfessionalPage from "./components/HireProfessionalPage";
 
 import BusinessPayouts from "./components/BusinessPayouts";
@@ -49,6 +58,14 @@ import CookiesStatement from "./components/CookiesStatement";
 
 export default function App() {
   useEffect(() => {
+    // Initialize the accent theme from localStorage
+    const savedTheme = localStorage.getItem("referr_theme") || "black";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    // Clear any previous trapped simulated subdomain/slug to completely prevent hijacking
+    localStorage.removeItem("simulated_subdomain");
+    localStorage.removeItem("user_published_slug");
+
     getCurrentSession().then((session) => {
       if (session) {
         localStorage.setItem("isAuthenticated", "true");
@@ -84,6 +101,7 @@ export default function App() {
       <CookieConsent />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/brand" element={<BrandLandingPage />} />
         <Route path="/join" element={<OnboardingSelection />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/onboarding" element={<OnboardingSelection />} />
@@ -96,37 +114,38 @@ export default function App() {
 
         {/* Persistent Sidebar Layout Group */}
         <Route element={<SidebarLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/hustler" element={<HustlerDashboard />} />
-          <Route path="/dashboard/business" element={<BusinessDashboard />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/hustler" element={<ProtectedRoute allowedRole="hustler"><HustlerDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/business" element={<ProtectedRoute allowedRole="business"><BusinessDashboard /></ProtectedRoute>} />
           <Route
             path="/hustler/wallet"
-            element={<Wallet userType="hustler" />}
+            element={<ProtectedRoute allowedRole="hustler"><Wallet userType="hustler" /></ProtectedRoute>}
           />
           <Route
             path="/business/wallet"
-            element={<Wallet userType="business" />}
+            element={<ProtectedRoute allowedRole="business"><Wallet userType="business" /></ProtectedRoute>}
           />
-          <Route path="/business/payouts" element={<BusinessPayouts />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/deals" element={<Deals />} />
-          <Route path="/deal/:id" element={<DealDetails />} />
-          <Route path="/post-deal" element={<PostDealPage />} />
-          <Route path="/dashboard/deals" element={<PostDealPage />} />
-          <Route path="/dashboard/blog" element={<PostBlogPage />} />
+          <Route path="/business/payouts" element={<ProtectedRoute allowedRole="business"><BusinessPayouts /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/deals" element={<ProtectedRoute><Deals /></ProtectedRoute>} />
+          <Route path="/deal/:id" element={<ProtectedRoute><DealDetails /></ProtectedRoute>} />
+          <Route path="/post-deal" element={<ProtectedRoute allowedRole="business"><PostDealPage /></ProtectedRoute>} />
+          <Route path="/dashboard/deals" element={<ProtectedRoute allowedRole="business"><PostDealPage /></ProtectedRoute>} />
+          <Route path="/dashboard/blog" element={<ProtectedRoute allowedRole="business"><PostBlogPage /></ProtectedRoute>} />
+          <Route path="/business/ad-networks" element={<ProtectedRoute allowedRole="business"><AdNetworksPage /></ProtectedRoute>} />
           <Route
             path="/hustler/analytics"
-            element={<AnalyticsPage userType="hustler" />}
+            element={<ProtectedRoute allowedRole="hustler"><AnalyticsPage userType="hustler" /></ProtectedRoute>}
           />
           <Route
             path="/business/analytics"
-            element={<AnalyticsPage userType="business" />}
+            element={<ProtectedRoute allowedRole="business"><AnalyticsPage userType="business" /></ProtectedRoute>}
           />
-          <Route path="/business/referrers" element={<ReferrersPage />} />
-          <Route path="/business/favorites" element={<FavoritesPage />} />
-          <Route path="/site-app" element={<SiteMobileApp />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/help" element={<HelpPage />} />
+          <Route path="/business/referrers" element={<ProtectedRoute allowedRole="business"><ReferrersPage /></ProtectedRoute>} />
+          <Route path="/business/favorites" element={<ProtectedRoute allowedRole="business"><FavoritesPage /></ProtectedRoute>} />
+          <Route path="/site-app" element={<ProtectedRoute allowedRole="business"><SiteMobileApp /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+          <Route path="/help" element={<ProtectedRoute><HelpPage /></ProtectedRoute>} />
         </Route>
 
         {/* Standalone Pages */}
@@ -134,12 +153,11 @@ export default function App() {
         <Route path="/cookies-statement" element={<CookiesStatement />} />
 
         {/* Full-screen Builders (No Sidebar) */}
-        <Route path="/create-profile" element={<CreateProfile />} />
-        <Route path="/create-site" element={<CreateSitePage />} />
-        <Route path="/design-aria" element={<AriaDesignPage />} />
-        <Route path="/editor" element={<SiteEditorPage />} />
-        <Route path="/s/:businessSlug" element={<LiveSiteView />} />
-        <Route path="/site/:businessSlug" element={<LiveSiteView />} />
+        <Route path="/create-profile" element={<ProtectedRoute><CreateProfile /></ProtectedRoute>} />
+        <Route path="/create-site" element={<ProtectedRoute allowedRole="business"><CreateSitePage /></ProtectedRoute>} />
+        <Route path="/design-aria" element={<ProtectedRoute allowedRole="business"><ArialDesignPage /></ProtectedRoute>} />
+        <Route path="/design-arial" element={<ProtectedRoute allowedRole="business"><ArialDesignPage /></ProtectedRoute>} />
+        <Route path="/editor" element={<ProtectedRoute allowedRole="business"><SiteEditorPage /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

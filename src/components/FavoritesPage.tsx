@@ -26,89 +26,85 @@ export default function FavoritesPage() {
   );
 
   return (
-    <div className="max-w-[1000px] mx-auto text-left">
-      <div className="mb-12 text-left">
-        <h1 className="text-[32px] font-bold text-[#222325] tracking-tight italic text-left">
+    <div className="max-w-7xl mx-auto pt-8 px-4 pb-24">
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mb-2">
           Favorites
         </h1>
-        <p className="text-slate-400 text-[14px] mt-1 text-left">
+        <p className="text-slate-500 text-sm">
           Your handpicked top-performing referrers.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 text-left">
+      <div className="grid grid-cols-1 gap-4">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-white border border-slate-200 p-6 flex items-center justify-between text-left">
-              <div className="flex items-center gap-4 text-left">
-                <Skeleton className="w-16 h-16 rounded-full text-left" />
-                <div className="space-y-2 text-left">
-                  <Skeleton className="w-32 h-5 rounded text-left" />
-                  <Skeleton className="w-48 h-4 rounded text-left" />
+            <div key={i} className="bg-white border border-slate-200/80 rounded-xl p-6 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Skeleton className="w-12 h-12 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="w-32 h-4 rounded" />
+                  <Skeleton className="w-48 h-3 rounded" />
                 </div>
               </div>
-              <Skeleton className="w-24 h-10 rounded text-left" />
+              <Skeleton className="w-10 h-10 rounded-lg" />
             </div>
           ))
         ) : favoriteReferrers.length > 0 ? (
           favoriteReferrers.map((referrer) => (
             <div
               key={referrer.id}
-              className="bg-white border border-slate-200 p-6 hover:border-[#1dbf73] transition-all group text-left"
+              className="bg-white border border-slate-200/80 rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-all"
             >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 text-left">
-                <div className="flex items-center gap-5 text-left">
-                  <div className="relative text-left">
-                    <img
-                      src={referrer.avatar}
-                      alt={referrer.name}
-                      className="w-16 h-16 rounded-full border-2 border-slate-50 object-cover text-left"
-                    />
-                    <div className="absolute -top-1 -right-1 bg-[#1dbf73] text-white p-1 rounded-full shadow-lg text-left">
-                      <Star size={10} fill="currentColor" />
-                    </div>
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-[18px] font-bold text-[#222325] text-left">
-                      {referrer.name}
-                    </h3>
-                    <div className="flex items-center gap-4 mt-1 text-left">
-                      <p className="text-slate-400 text-[13px] text-left">
-                        <span className="font-bold text-[#1dbf73] text-left">{(referrer as any).referrals}</span> Referrals
-                      </p>
-                      <div className="w-1 h-1 rounded-full bg-slate-200" />
-                      <div className="flex items-center gap-1 text-[#1dbf73] text-[13px] font-bold">
-                        <ShieldCheck size={14} />
-                        <span>{(referrer as any).reliabilityScore}% Reliability</span>
-                      </div>
-                    </div>
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <img
+                    src={referrer.avatar}
+                    alt={referrer.name}
+                    className="w-14 h-14 rounded-full border border-slate-100 object-cover"
+                  />
+                  <div className="absolute -top-1 -right-1 bg-amber-400 text-white p-1 rounded-full shadow-sm">
+                    <Star size={10} fill="currentColor" />
                   </div>
                 </div>
-
-                <div className="flex items-center gap-3 text-left">
-                  <button
-                    onClick={() => removeFavorite(referrer.id)}
-                    className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-none text-left"
-                    title="Remove from favorites"
-                  >
-                    <Trash2 size={20} />
-                  </button>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    {referrer.name}
+                  </h3>
+                  <div className="flex items-center gap-3 mt-1 text-xs">
+                    <p className="text-slate-500">
+                      <span className="font-bold text-pink-600">{(referrer as any).referrals}</span> Referrals
+                    </p>
+                    <div className="w-1 h-1 rounded-full bg-slate-300" />
+                    <div className="flex items-center gap-1.5 text-pink-600 font-bold">
+                      <ShieldCheck size={14} />
+                      <span>{(referrer as any).reliabilityScore}% Reliability</span>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              <button
+                onClick={() => removeFavorite(referrer.id)}
+                className="p-2.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-lg ml-auto"
+                title="Remove from favorites"
+              >
+                <Trash2 size={18} />
+              </button>
             </div>
           ))
         ) : (
-          <div className="bg-white border border-slate-200 p-20 flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 bg-slate-50 flex items-center justify-center text-slate-200 mb-6 rounded-full">
-              <Heart size={32} />
+          <div className="bg-white border border-slate-200/80 rounded-xl p-16 flex flex-col items-center justify-center text-center">
+            <div className="w-12 h-12 bg-slate-50 flex items-center justify-center text-slate-300 mb-4 rounded-full">
+              <Heart size={20} />
             </div>
-            <h3 className="text-[20px] font-bold text-[#222325] mb-2">No favorites yet</h3>
-            <p className="text-slate-400 max-w-sm mb-8">
+            <h3 className="text-lg font-bold text-slate-900 mb-1">No favorites yet</h3>
+            <p className="text-slate-500 text-sm max-w-xs mb-6">
               Handpick your favorite referrers from the Analytics leaderboard to stay connected.
             </p>
             <button
               onClick={() => window.location.href = "/dashboard/analytics"}
-              className="bg-[#1dbf73] text-white px-8 py-3 font-bold text-[13px] hover:bg-[#19a463] transition-all uppercase tracking-widest"
+              className="bg-slate-900 text-white px-6 py-2.5 font-bold text-xs rounded-lg hover:bg-slate-800 transition-all uppercase tracking-wider"
             >
               Browse Referrers
             </button>

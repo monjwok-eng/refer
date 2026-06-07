@@ -11,7 +11,10 @@ import {
 import { SiteConfig } from "../types/site";
 
 export const MinimalAgency = ({ config }: { config?: SiteConfig }) => (
-  <div className="@container bg-white min-h-full font-sans text-slate-900 selection:bg-black selection:text-white">
+  <div 
+    className="@container bg-white min-h-full font-sans text-slate-900 selection:bg-black selection:text-white"
+    style={{ backgroundColor: config?.brand.backgroundColor || "#ffffff" }}
+  >
     <div className="p-8 md:p-16 max-w-[1400px] mx-auto">
       <nav className="flex justify-between items-center mb-32">
         <div className="flex items-center gap-3">
@@ -159,7 +162,10 @@ export const MinimalAgency = ({ config }: { config?: SiteConfig }) => (
 );
 
 export const ProfessionalServices = ({ config }: { config?: SiteConfig }) => (
-  <div className="@container bg-[#fcfdfe] min-h-full font-sans text-slate-900 selection:bg-[#1dbf73] selection:text-white">
+  <div 
+    className="@container bg-[#fcfdfe] min-h-full font-sans text-slate-900 selection:bg-[#1dbf73] selection:text-white"
+    style={{ backgroundColor: config?.brand.backgroundColor || "#fcfdfe" }}
+  >
     <div className="h-2" style={{ backgroundColor: config?.brand.accentColor || "#1dbf73" }} />
     <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-5 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -284,7 +290,10 @@ export const ProfessionalServices = ({ config }: { config?: SiteConfig }) => (
 );
 
 export const EditorialPortfolio = ({ config }: { config?: SiteConfig }) => (
-  <div className="@container bg-[#0a0a0a] min-h-full font-serif text-white selection:bg-white selection:text-black">
+  <div 
+    className="@container bg-[#0a0a0a] min-h-full font-serif text-white selection:bg-white selection:text-black"
+    style={{ backgroundColor: config?.brand.backgroundColor || "#0a0a0a" }}
+  >
     <div className="p-8 md:p-16 max-w-[1400px] mx-auto">
       <div className="flex justify-between items-start mb-48">
         <div className="space-y-2 group cursor-pointer">

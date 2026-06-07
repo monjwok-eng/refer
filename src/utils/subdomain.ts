@@ -9,8 +9,7 @@ export function getSubdomain(): string | null {
 
   // Exclude local IP and common non-subdomain hostnames
   if (host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0") {
-    // If it's pure localhost, check if there's a stored mock subdomain in local storage to simulate
-    return localStorage.getItem("simulated_subdomain") || null;
+    return null;
   }
 
   const parts = host.split(".");
@@ -19,14 +18,7 @@ export function getSubdomain(): string | null {
   // Check if we are in the Europe-West (Cloud Run) preview domain
   // e.g. ais-pre-e5c7xgl5vohy4nqqn2ckvp-283796243588.europe-west2.run.app
   if (host.includes(".run.app") || host.includes("web.app") || host.includes("firebaseapp.com")) {
-    // Wildcard run.app subdomains don't resolve directly, so we allow simulating the custom subdomain behavior
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlSub = urlParams.get("subdomain");
-    if (urlSub) {
-      localStorage.setItem("simulated_subdomain", urlSub.toLowerCase());
-      return urlSub.toLowerCase();
-    }
-    return localStorage.getItem("simulated_subdomain") || null;
+    return null;
   }
 
   // Handle standard subdomains (e.g., mybusiness.referr.me)
@@ -43,7 +35,7 @@ export function getSubdomain(): string | null {
     }
   }
 
-  return localStorage.getItem("simulated_subdomain") || null;
+  return null;
 }
 
 /**

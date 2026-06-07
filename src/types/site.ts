@@ -8,6 +8,7 @@ export interface SiteConfig {
   brand: {
     name: string;
     accentColor: string;
+    backgroundColor?: string;
     tagline?: string;
   };
   features: {

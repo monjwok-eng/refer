@@ -23,7 +23,7 @@ import {
   EditorialPortfolio,
 } from "./RealWebsites";
 
-const AriaAvatar = () => {
+const ArialAvatar = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -54,7 +54,7 @@ const AriaAvatar = () => {
   );
 };
 
-export default function AriaDesignPage() {
+export default function ArialDesignPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [prompt, setPrompt] = useState("");
@@ -169,7 +169,7 @@ export default function AriaDesignPage() {
           {/* Header Block - Reduced size and refined typography */}
           <div className="flex flex-col items-center gap-3 md:gap-[16px] text-center">
             <h1 className="text-[32px] md:text-[42px] font-normal text-[#222325] tracking-tighter leading-tight max-w-sm md:max-w-lg">
-              Design your signature <br className="hidden sm:block" /> site with Aria
+              Design your signature <br className="hidden sm:block" /> site with Arial
             </h1>
             <span className="text-[13px] md:text-[14px] text-[#62646a] font-light leading-relaxed max-w-[280px] md:max-w-sm">
               An intelligent design partner that crafts bespoke interactive
@@ -181,7 +181,7 @@ export default function AriaDesignPage() {
             {/* Status & Avatar Row */}
             <div className="flex items-center gap-3 min-h-[28px] relative pl-10 md:pl-9">
               <div className="absolute left-0 top-1/2 -translate-y-1/2">
-                <AriaAvatar />
+                <ArialAvatar />
               </div>
               <span
                 className={`text-[12px] md:text-[13px] font-normal tracking-wide transition-colors duration-500 ${isWritingPrompt ? "text-slate-400 italic" : "text-[#1dbf73]"}`}
@@ -191,7 +191,7 @@ export default function AriaDesignPage() {
                     animate={{ opacity: [1, 0.5, 1] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
                   >
-                    Aria is generating your blueprint...
+                    Arial is generating your blueprint...
                   </motion.span>
                 ) : (
                   "Ready to generate."

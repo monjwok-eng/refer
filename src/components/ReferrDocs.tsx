@@ -96,7 +96,7 @@ export default function ReferrDocs() {
 
             <section id="privacy" className="mb-16 md:mb-24 pt-12 md:pt-16 border-t border-slate-200">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 border-b border-slate-200 pb-6 md:pb-8 mb-8 md:mb-10">
-                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl w-fit"><Shield className="w-8 h-8 md:w-8 md:h-8" /></div>
+                <div className="p-3 bg-pink-50 text-pink-600 rounded-2xl w-fit"><Shield className="w-8 h-8 md:w-8 md:h-8" /></div>
                 <div>
                   <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-[#222325]">Privacy & Security</h2>
                   <p className="text-sm md:text-base text-slate-500 mt-1">Safety first.</p>

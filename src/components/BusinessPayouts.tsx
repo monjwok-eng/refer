@@ -12,48 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 
-const payoutsData = [
-  {
-    id: "PAY-001",
-    partner: "Alex Rivera",
-    email: "alex.r@example.com",
-    referrals: 12,
-    amount: 145.00,
-    status: "Pending",
-    lastSale: "2 hours ago",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"
-  },
-  {
-    id: "PAY-002",
-    partner: "Sarah Chen",
-    email: "sarahc@tech.design",
-    referrals: 8,
-    amount: 92.50,
-    status: "Ready to Pay",
-    lastSale: "5 hours ago",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop"
-  },
-  {
-    id: "PAY-003",
-    partner: "Marcus Thorne",
-    email: "m.thorne@creative.co",
-    referrals: 24,
-    amount: 310.00,
-    status: "Completed",
-    lastSale: "1 day ago",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
-  },
-  {
-    id: "PAY-004",
-    partner: "Elena Rodriguez",
-    email: "elena.rod@growth.io",
-    referrals: 5,
-    amount: 55.00,
-    status: "Ready to Pay",
-    lastSale: "3 days ago",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
-  }
-];
+const payoutsData: any[] = [];
 
 export default function BusinessPayouts() {
   const [filter, setFilter] = useState("all");
@@ -78,85 +37,79 @@ export default function BusinessPayouts() {
   };
 
   return (
-    <>
-      <div className="mb-6 md:mb-10 px-4 md:px-6 text-left">
-        <h1 className="text-[28px] md:text-[32px] font-black tracking-tight mb-2 text-[#222325]">
-          Partner Payouts
-        </h1>
-        <p className="text-[#62646a] text-[15px] md:text-lg font-medium leading-snug">
-          See who needs to be paid and manage your referral commissions.
-        </p>
-      </div>
+    <div className="max-w-7xl mx-auto pt-8 px-4 pb-24">
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mb-2">
+            Partner Payouts
+          </h1>
+          <p className="text-slate-500 text-sm">
+            See who needs to be paid and manage your referral commissions.
+          </p>
+        </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-10 px-4 md:px-6">
-        <div className="bg-white p-5 md:p-6 border border-slate-200 shadow-sm flex flex-col justify-center">
-          <div className="flex items-center gap-3 mb-3 text-slate-500">
-            <div className="p-1.5 bg-orange-50 text-orange-600 border border-orange-100 rounded-sm">
-              <Clock size={16} strokeWidth={2.5} />
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white p-6 border border-slate-200/80 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+            <div className="flex items-center gap-3 mb-3 text-slate-500">
+              <Clock size={16} />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Ready to Pay</span>
             </div>
-            <span className="text-[11px] md:text-xs font-black uppercase tracking-wider text-slate-700">Ready to Pay</span>
+            <p className="text-3xl font-bold text-slate-900">$147.50</p>
+            <p className="text-xs text-slate-500 mt-2">2 partners reached threshold</p>
           </div>
-          <p className="text-2xl md:text-3xl font-black text-slate-900">$147.50</p>
-          <p className="text-[11px] md:text-xs text-slate-500 mt-1 font-medium italic">2 partners reached threshold</p>
-        </div>
 
-        <div className="bg-white p-5 md:p-6 border border-slate-200 shadow-sm flex flex-col justify-center">
-          <div className="flex items-center gap-3 mb-3 text-slate-500">
-            <div className="p-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-sm">
-              <DollarSign size={16} strokeWidth={2.5} />
+          <div className="bg-white p-6 border border-slate-200/80 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+            <div className="flex items-center gap-3 mb-3 text-slate-500">
+              <DollarSign size={16} />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Total Paid</span>
             </div>
-            <span className="text-[11px] md:text-xs font-black uppercase tracking-wider text-slate-700">Total Paid</span>
+            <p className="text-3xl font-bold text-slate-900">$4,850.00</p>
+            <p className="text-xs text-slate-500 mt-2">All time commissions paid</p>
           </div>
-          <p className="text-2xl md:text-3xl font-black text-slate-900">$4,850.00</p>
-          <p className="text-[11px] md:text-xs text-slate-500 mt-1 font-medium italic">All time commissions paid</p>
-        </div>
 
-        <div className="bg-white p-5 md:p-6 border border-slate-200 shadow-sm flex flex-col justify-center">
-          <div className="flex items-center gap-3 mb-3 text-slate-500">
-            <div className="p-1.5 bg-blue-50 text-blue-600 border border-blue-100 rounded-sm">
-              <Users size={16} strokeWidth={2.5} />
+          <div className="bg-white p-6 border border-slate-200/80 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+            <div className="flex items-center gap-3 mb-3 text-slate-500">
+              <Users size={16} />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Active Partners</span>
             </div>
-            <span className="text-[11px] md:text-xs font-black uppercase tracking-wider text-slate-700">Active Partners</span>
+            <p className="text-3xl font-bold text-slate-900">156</p>
+            <p className="text-xs text-slate-500 mt-2">Partners currently referring</p>
           </div>
-          <p className="text-2xl md:text-3xl font-black text-slate-900">156</p>
-          <p className="text-[11px] md:text-xs text-slate-500 mt-1 font-medium italic">Partners currently referring</p>
         </div>
-      </div>
 
-      {/* List Section */}
-      <div className="bg-white border border-slate-200 shadow-sm overflow-hidden mb-8 md:mb-10 mx-4 md:mx-6 rounded-sm">
-        <div className="px-4 md:px-6 py-4 md:py-6 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex flex-wrap items-center gap-2 md:gap-3">
-            <button 
-              onClick={() => setFilter("all")}
-              className={`h-[40px] px-6 text-[11px] md:text-xs font-black uppercase tracking-widest transition-all border ${filter === 'all' ? 'bg-[#222325] text-white border-[#222325]' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-400'}`}
-            >
-              All
-            </button>
-            <button 
-              onClick={() => setFilter("ready")}
-              className={`h-[40px] px-6 text-[11px] md:text-xs font-black uppercase tracking-widest transition-all border ${filter === 'ready' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-400'}`}
-            >
-              Ready
-            </button>
-            <button 
-              onClick={() => setFilter("pending")}
-              className={`h-[40px] px-6 text-[11px] md:text-xs font-black uppercase tracking-widest transition-all border ${filter === 'pending' ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-400'}`}
-            >
-              Pending
-            </button>
+        {/* List Section */}
+        <div className="bg-white border border-slate-200/80 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <button 
+                onClick={() => setFilter("all")}
+                className={`px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-colors ${filter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              >
+                All
+              </button>
+              <button 
+                onClick={() => setFilter("ready")}
+                className={`px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-colors ${filter === 'ready' ? 'bg-pink-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              >
+                Ready
+              </button>
+              <button 
+                onClick={() => setFilter("pending")}
+                className={`px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-colors ${filter === 'pending' ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              >
+                Pending
+              </button>
+            </div>
+            
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search partners..."
+                className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-slate-100 transition-all"
+              />
+            </div>
           </div>
-          
-          <div className="relative">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search partners..."
-              className="pl-12 pr-4 h-[44px] bg-white border border-slate-200 text-[15px] w-full md:w-64 focus:outline-none focus:border-slate-400 shadow-sm"
-            />
-          </div>
-        </div>
 
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left min-w-[600px] md:min-w-0">
@@ -203,7 +156,7 @@ export default function BusinessPayouts() {
                       </span>
                     )}
                     {payout.status === "Completed" && (
-                      <span className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 text-[10px] md:text-xs font-medium w-fit border border-emerald-100 whitespace-nowrap">
+                      <span className="flex items-center gap-1 text-pink-700 bg-pink-50 px-2 py-0.5 text-[10px] md:text-xs font-medium w-fit border border-pink-100 whitespace-nowrap">
                         <CheckCircle2 size={10} className="md:w-3 md:h-3" />
                         Paid
                       </span>
@@ -267,7 +220,7 @@ export default function BusinessPayouts() {
                     ) : payout.status === "Pending" ? (
                       <span className="text-[10px] font-black text-blue-600 uppercase bg-blue-50 px-1.5 py-0.5 rounded-sm border border-blue-100 leading-none">In Process</span>
                     ) : (
-                      <span className="text-[10px] font-black text-emerald-600 uppercase bg-emerald-50 px-1.5 py-0.5 rounded-sm border border-emerald-100">Paid</span>
+                      <span className="text-[10px] font-black text-pink-600 uppercase bg-pink-50 px-1.5 py-0.5 rounded-sm border border-pink-100">Paid</span>
                     )}
                   </div>
                 </div>
@@ -302,17 +255,17 @@ export default function BusinessPayouts() {
           <h3 className="text-lg md:text-xl font-bold mb-6">How payouts work?</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             <div className="space-y-2 md:space-y-3">
-              <div className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-xs md:text-sm font-bold bg-emerald-500 text-slate-900 rounded-sm">1</div>
+              <div className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-xs md:text-sm font-bold bg-pink-500 text-slate-900 rounded-sm">1</div>
               <p className="font-semibold text-sm">Threshold Reach</p>
               <p className="text-xs md:text-sm text-slate-400 leading-relaxed font-medium">Once a partner's commission crosses $50, they are listed as "Ready to Pay".</p>
             </div>
             <div className="space-y-2 md:space-y-3">
-              <div className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-xs md:text-sm font-bold bg-emerald-500 text-slate-900 rounded-sm">2</div>
+              <div className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-xs md:text-sm font-bold bg-pink-500 text-slate-900 rounded-sm">2</div>
               <p className="font-semibold text-sm">One-Click Payment</p>
               <p className="text-xs md:text-sm text-slate-400 leading-relaxed font-medium">Click "Pay Now" to send funds directly to their wallet via your connected provider.</p>
             </div>
             <div className="space-y-2 md:space-y-3">
-              <div className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-xs md:text-sm font-bold bg-emerald-500 text-slate-900 rounded-sm">3</div>
+              <div className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-xs md:text-sm font-bold bg-pink-500 text-slate-900 rounded-sm">3</div>
               <p className="font-semibold text-sm">Tax Compliance</p>
               <p className="text-xs md:text-sm text-slate-400 leading-relaxed font-medium">We automatically generate 1099 forms and detailed financial reports for your records.</p>
             </div>
@@ -328,12 +281,12 @@ export default function BusinessPayouts() {
           exit={{ opacity: 0, y: 50 }}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#222325] text-white px-6 py-3 rounded shadow-xl flex items-center gap-3 border border-slate-700 font-medium text-sm md:text-base whitespace-nowrap"
         >
-          <div className="bg-emerald-500 rounded-full p-1 shrink-0">
+          <div className="bg-pink-500 rounded-full p-1 shrink-0">
             <CheckCircle2 size={16} className="text-white" />
           </div>
           {showToast}
         </motion.div>
       )}
-    </>
+    </div>
   );
 }

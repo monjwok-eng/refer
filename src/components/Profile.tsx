@@ -32,9 +32,10 @@ export default function Profile() {
     ? localStorage.getItem("businessName") || "Business"
     : localStorage.getItem("hustlerName") || "Hustler";
   const userPicture = localStorage.getItem("userPicture") || "https://images-wixmp-7ef3383b5fd80a9f5a5cc686.wixmp.com/27765ee8-82b7-404f-91cd-a507b11093a6/1741463568052/v1/fill/w_320,h_320/file.jpg";
-  const referralCode = localStorage.getItem("userEmail")
+  const userId = localStorage.getItem("userId") || `USR-${name.replace(/\s+/g, "").substring(0, 4).toUpperCase()}-1209`;
+  const referralCode = localStorage.getItem("referralCode") || (localStorage.getItem("userEmail")
     ? localStorage.getItem("userEmail")?.split("@")[0].toUpperCase()
-    : "MOSES2026";
+    : "MOSES2026");
 
   const profileStats = [
     { label: "My Referrals", value: "0", icon: Users },
@@ -94,16 +95,32 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="bg-gray-50 border border-gray-100 rounded-lg p-6 w-full md:w-auto">
-               <p className="text-xs font-bold text-[#74767e] uppercase tracking-wider mb-2">Personal Invite</p>
-               <div className="flex items-center gap-3">
-                 <code className="text-lg font-bold text-[#222325]">{referralCode}</code>
-                 <button 
-                  onClick={() => navigator.clipboard.writeText(referralCode)}
-                  className="p-2 text-[#1dbf73] hover:bg-[#1dbf73]/10 rounded transition-colors"
-                 >
-                   <Copy size={18} />
-                 </button>
+            <div className="bg-gray-50 border border-gray-100 rounded-lg p-6 w-full md:w-auto space-y-4">
+               <div>
+                 <p className="text-xs font-bold text-[#74767e] uppercase tracking-wider mb-1">Invite Code</p>
+                 <div className="flex items-center gap-3">
+                   <code className="text-sm font-mono font-bold text-[#222325]">{referralCode}</code>
+                   <button 
+                    onClick={() => navigator.clipboard.writeText(referralCode)}
+                    className="p-1.5 text-[#1dbf73] hover:bg-[#1dbf73]/10 rounded transition-colors"
+                    title="Copy Invite Code"
+                   >
+                     <Copy size={16} />
+                   </button>
+                 </div>
+               </div>
+               <div className="border-t border-gray-200/50 pt-3">
+                 <p className="text-xs font-bold text-[#74767e] uppercase tracking-wider mb-1">System User ID</p>
+                 <div className="flex items-center gap-3">
+                   <code className="text-sm font-mono text-slate-500 font-medium">{userId}</code>
+                   <button 
+                    onClick={() => navigator.clipboard.writeText(userId)}
+                    className="p-1.5 text-slate-400 hover:bg-slate-200 rounded transition-colors"
+                    title="Copy System User ID"
+                   >
+                     <Copy size={16} />
+                   </button>
+                 </div>
                </div>
             </div>
           </div>

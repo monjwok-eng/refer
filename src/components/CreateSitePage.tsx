@@ -10,121 +10,52 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Logo } from "./Navbar";
+import LoadingScreen from "./LoadingScreen";
 
 export default function CreateSitePage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [showSpinner, setShowSpinner] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
 
   const [siteDescription, setSiteDescription] = useState("");
   const [siteName, setSiteName] = useState("");
   const [siteGoals, setSiteGoals] = useState("");
 
+  const loadingTasks = [
+    "Analyzing business requirements",
+    "Synthesizing layout architecture",
+    "Curating unique design tokens",
+    "Generating responsive grid",
+    "Injecting creative intelligence",
+    "Preparing your workspace",
+  ];
+
+  useEffect(() => {
+    if (showSpinner) {
+      const interval = setInterval(() => {
+        setLoadingStep((prev) => 
+          prev < loadingTasks.length - 1 ? prev + 1 : prev
+        );
+      }, 1800);
+      return () => clearInterval(interval);
+    }
+  }, [showSpinner]);
+
   const handleGenerate = () => {
     setShowSpinner(true);
     setTimeout(() => {
-      navigate("/design-aria", {
+      navigate("/design-arial", {
         state: { siteName, siteDescription, siteGoals },
       });
-    }, 11000); // Further increased for a more deliberate transition
+    }, 11000); 
   };
 
   if (showSpinner) {
-    const loadingTasks = [
-      "Analyzing business requirements",
-      "Synthesizing layout architecture",
-      "Curating unique design tokens",
-      "Generating responsive grid",
-      "Injecting creative intelligence",
-      "Preparing your workspace",
-    ];
-
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-[1000] overflow-hidden text-[#222325] font-sans">
-        {/* Minimal ambient light tint */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#1dbf73]/[0.02] rounded-full blur-[100px] -mr-40 -mt-20" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#1dbf73]/[0.02] rounded-full blur-[100px] -ml-40 -mb-20" />
-
-        <div className="relative z-10 w-full flex flex-col items-center px-6">
-          {/* Minimal Spinner */}
-          <div className="relative mb-8 md:mb-20">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-              className="w-12 h-12 md:w-16 md:h-16 rounded-full border-[1px] border-slate-100 border-t-[#1dbf73]"
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Sparkles size={16} className="text-[#1dbf73] fill-[#1dbf73] md:w-5 md:h-5" />
-            </div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2 }}
-            className="text-center mb-10 md:mb-16"
-          >
-            <h1 className="text-[24px] md:text-[28px] font-black tracking-tight text-[#222325] mb-3 md:mb-4">
-              Designing{" "}
-              {siteName ? (
-                <span className="text-[#1dbf73]">{siteName}</span>
-              ) : (
-                "your vision"
-              )}
-            </h1>
-            <p className="text-[#62646a] text-[14px] md:text-[15px] font-medium">
-              Aria is crafting your unique ecosystem
-            </p>
-          </motion.div>
-
-          {/* Sequential Task Feed */}
-          <div className="flex flex-col items-start gap-3 md:gap-4 max-w-[280px] md:max-w-none">
-            {loadingTasks.map((text, i) => (
-              <motion.div
-                key={text}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 + i * 1.5 }}
-                className="flex items-center gap-3 md:gap-4 text-[13px] md:text-[14px] text-[#62646a] font-medium"
-              >
-                <motion.div
-                  className="w-1.5 h-1.5 rounded-full bg-[#1dbf73] shrink-0"
-                  animate={{
-                    opacity: [0.3, 1, 0.3],
-                    scale: [0.8, 1.2, 0.8],
-                  }}
-                  transition={{ duration: 2, delay: i * 1.5, repeat: Infinity }}
-                />
-                <span className="truncate">{text}</span>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Micro Progress Bar */}
-          <div className="mt-16 md:mt-28 w-full max-w-[240px]">
-            <div className="h-[2px] w-full bg-slate-100 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 11, ease: "easeInOut" }}
-                className="h-full bg-[#1dbf73]"
-              />
-            </div>
-            <div className="flex justify-between mt-3 px-1 text-[#222325]/30">
-              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em]">
-                Processing
-              </span>
-              <motion.span
-                animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em]"
-              >
-                Live
-              </motion.span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <LoadingScreen 
+        text={loadingTasks[loadingStep]} 
+      />
     );
   }
 
@@ -144,17 +75,30 @@ export default function CreateSitePage() {
 
       {/* Progress Bar */}
       {step > 0 && step <= 4 && (
-        <div className="w-full h-1.5 bg-slate-100 shrink-0">
+        <div className="w-full h-1 bg-slate-100 shrink-0">
           <div
-            className="h-full bg-[#1dbf73] transition-all duration-500 ease-out"
+            className="h-full bg-[#ec4899] transition-all duration-500 ease-out"
             style={{ width: `${(step / 4) * 100}%` }}
           />
         </div>
       )}
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center w-full px-5 md:px-6 pt-10 md:pt-12 pb-32 bg-[#f8f9fa]">
-        <div className="w-full max-w-[800px] flex-1 flex flex-col justify-center mt-[-40px] md:mt-[-80px]">
+      <main className="flex-1 flex flex-col items-center w-full px-5 md:px-6 pt-10 md:pt-12 pb-32 bg-[#FAFAFA]">
+        {/* Honeycomb Background Pattern */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] select-none z-0">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="honeycomb-create" width="56" height="97" patternUnits="userSpaceOnUse" patternTransform="scale(1.2)">
+                <path d="M28 0 L56 16.16 L56 48.5 L28 64.66 L0 48.5 L0 16.16 Z" fill="none" stroke="#000000" strokeWidth="1.2" />
+                <path d="M28 48.5 L56 64.66 L56 97 L28 113.16 L0 97 L0 64.66 Z" fill="none" stroke="#000000" strokeWidth="1.2" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#honeycomb-create)" />
+          </svg>
+        </div>
+
+        <div className="w-full max-w-[800px] flex-1 flex flex-col justify-center mt-[-40px] md:mt-[-80px] z-10">
           {step === 0 && (
             <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col justify-center text-left">
               <h1 className="text-[28px] md:text-3xl font-black mb-3 md:mb-4 text-[#222325] tracking-tight leading-tight">
@@ -168,12 +112,12 @@ export default function CreateSitePage() {
               <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4">
                 <button
                   onClick={() => setStep(1)}
-                  className="w-full sm:w-auto bg-[#1dbf73] text-white px-8 h-[52px] md:h-auto md:py-3 rounded-[4px] font-bold hover:bg-[#19a463] transition-all flex items-center justify-center gap-2 text-[16px] shadow-md shadow-emerald-500/10"
+                  className="w-full sm:w-auto bg-black text-white px-8 h-[52px] md:h-auto md:py-3 rounded-[4px] font-bold hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 text-[16px] shadow-sm"
                 >
                   Get started
                 </button>
                 <button
-                  onClick={() => navigate("/editor")}
+                  onClick={() => navigate("/dashboard/business")}
                   className="w-full sm:w-auto h-[52px] md:h-auto px-8 md:py-3 rounded-[4px] font-bold text-[#62646a] hover:bg-white border border-transparent hover:border-slate-200 transition-all flex items-center justify-center gap-2 text-[16px]"
                 >
                   Skip for now
@@ -196,7 +140,7 @@ export default function CreateSitePage() {
                   <input
                     type="text"
                     placeholder="e.g. An online store that sells..."
-                    className="w-full border border-[#e4e5e7] rounded-[4px] bg-white px-4 md:px-5 py-3.5 md:py-4 text-[16px] md:text-[18px] font-medium text-[#222325] focus:outline-none focus:border-[#1dbf73] transition-colors shadow-sm"
+                    className="w-full border border-[#e4e5e7] rounded-[4px] bg-white px-4 md:px-5 py-3.5 md:py-4 text-[16px] md:text-[18px] font-medium text-[#222325] focus:outline-none focus:border-[#ec4899] transition-colors shadow-sm"
                     value={siteDescription}
                     onChange={(e) => setSiteDescription(e.target.value)}
                     autoFocus
@@ -219,7 +163,7 @@ export default function CreateSitePage() {
                       <button
                         key={suggestion}
                         onClick={() => setSiteDescription(suggestion)}
-                        className="px-4 md:px-5 py-2.5 rounded-[4px] bg-white border border-[#e4e5e7] text-[#404145] font-semibold text-[14px] md:text-[15px] hover:border-[#1dbf73] transition-colors shadow-sm cursor-pointer whitespace-nowrap active:scale-95"
+                        className="px-4 md:px-5 py-2.5 rounded-[4px] bg-white border border-[#e4e5e7] text-[#404145] font-semibold text-[14px] md:text-[15px] hover:border-[#ec4899] hover:text-[#ec4899] transition-colors shadow-sm cursor-pointer whitespace-nowrap active:scale-95"
                       >
                         {suggestion}
                       </button>
@@ -244,7 +188,7 @@ export default function CreateSitePage() {
                   <input
                     type="text"
                     placeholder="e.g. Trendy Boutique"
-                    className="w-full border border-[#e4e5e7] rounded-[4px] bg-white px-4 md:px-5 py-3.5 md:py-4 text-[16px] md:text-[18px] font-medium text-[#222325] focus:outline-none focus:border-[#1dbf73] transition-colors shadow-sm"
+                    className="w-full border border-[#e4e5e7] rounded-[4px] bg-white px-4 md:px-5 py-3.5 md:py-4 text-[16px] md:text-[18px] font-medium text-[#222325] focus:outline-none focus:border-[#ec4899] transition-colors shadow-sm"
                     value={siteName}
                     onChange={(e) => setSiteName(e.target.value)}
                     autoFocus
@@ -265,7 +209,7 @@ export default function CreateSitePage() {
                       <button
                         key={suggestion}
                         onClick={() => setSiteName(suggestion)}
-                        className="px-4 md:px-5 py-2.5 rounded-[4px] bg-white border border-[#e4e5e7] text-[#404145] font-semibold text-[14px] md:text-[15px] hover:border-[#1dbf73] transition-colors shadow-sm cursor-pointer whitespace-nowrap active:scale-95"
+                        className="px-4 md:px-5 py-2.5 rounded-[4px] bg-white border border-[#e4e5e7] text-[#404145] font-semibold text-[14px] md:text-[15px] hover:border-[#ec4899] hover:text-[#ec4899] transition-colors shadow-sm cursor-pointer whitespace-nowrap active:scale-95"
                       >
                         {suggestion}
                       </button>
@@ -289,7 +233,7 @@ export default function CreateSitePage() {
                   </div>
                   <textarea
                     placeholder="e.g. Boost online sales, Connect with customers"
-                    className="w-full border border-[#e4e5e7] rounded-[4px] bg-white px-4 md:px-5 py-3.5 md:py-4 min-h-[140px] text-[16px] md:text-[18px] font-medium text-[#222325] focus:outline-none focus:border-[#1dbf73] transition-colors resize-none shadow-sm"
+                    className="w-full border border-[#e4e5e7] rounded-[4px] bg-white px-4 md:px-5 py-3.5 md:py-4 min-h-[140px] text-[16px] md:text-[18px] font-medium text-[#222325] focus:outline-none focus:border-[#ec4899] transition-colors resize-none shadow-sm"
                     value={siteGoals}
                     onChange={(e) => setSiteGoals(e.target.value)}
                     autoFocus
@@ -316,7 +260,7 @@ export default function CreateSitePage() {
                             : suggestion;
                           setSiteGoals(newGoals);
                         }}
-                        className="px-4 md:px-5 py-2 rounded-[4px] bg-white border border-[#e4e5e7] text-[#404145] font-semibold text-[13px] md:text-[15px] hover:border-[#1dbf73] transition-colors shadow-sm cursor-pointer whitespace-nowrap active:scale-95"
+                        className="px-4 md:px-5 py-2 rounded-[4px] bg-white border border-[#e4e5e7] text-[#404145] font-semibold text-[13px] md:text-[15px] hover:border-[#ec4899] hover:text-[#ec4899] transition-colors shadow-sm cursor-pointer whitespace-nowrap active:scale-95"
                       >
                         {suggestion}
                       </button>
@@ -358,7 +302,7 @@ export default function CreateSitePage() {
                 (step === 2 && !siteName.trim()) ||
                 (step === 3 && !siteGoals.trim())
               }
-              className="h-[52px] md:h-auto bg-[#1dbf73] text-white px-8 md:py-2.5 rounded-[4px] font-extrabold text-[15px] md:text-[16px] hover:bg-[#19a463] transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-emerald-500/10"
+              className="h-[52px] md:h-auto bg-black text-white px-8 md:py-2.5 rounded-[4px] font-extrabold text-[15px] md:text-[16px] hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
             >
               Continue
             </button>

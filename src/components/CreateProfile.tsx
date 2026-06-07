@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import Navbar from "./Navbar";
+import logoIcon from "../assets/images/ChatGPT Image Jun 1, 2026, 01_07_17 AM.png";
+import LoadingScreen from "./LoadingScreen";
 import {
   IconSprout,
   IconGraph,
@@ -60,98 +61,61 @@ export default function CreateProfile() {
   };
 
   return (
-    <div className="relative flex flex-col h-[100dvh] bg-white overflow-hidden">
-      {/* Loading Overlay */}
-      <AnimatePresence>
-        {isSubmitting && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/70 backdrop-blur-xl transition-all duration-700"
-          >
-            <div className="flex flex-col items-center max-w-sm px-6">
-              <div className="relative w-20 h-20 mb-10">
-                {/* Outer ring */}
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                  className="absolute inset-0 rounded-full border-[3px] border-[#e4e5e7]"
-                />
-                {/* Active segment */}
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 1.2,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                  className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-[#1dbf73]"
-                />
-                {/* Center dot */}
-                <motion.div
-                  animate={{ scale: [0.8, 1, 0.8] }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                  className="absolute inset-[32%] rounded-full bg-[#1dbf73]"
-                />
-              </div>
+    <div className="relative flex flex-col h-[100dvh] bg-[#FAFAFA] overflow-hidden">
+      {/* Honeycomb Geometric Background Pattern */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.04] sm:opacity-[0.05] select-none z-0">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="honeycomb-onboard" width="56" height="97" patternUnits="userSpaceOnUse" patternTransform="scale(0.85)">
+              <path d="M28 0 L56 16.16 L56 48.5 L28 64.66 L0 48.5 L0 16.16 Z" fill="none" stroke="#000000" strokeWidth="1.2" />
+              <path d="M28 48.5 L56 64.66 L56 97 L28 113.16 L0 97 L0 64.66 Z" fill="none" stroke="#000000" strokeWidth="1.2" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#honeycomb-onboard)" />
+        </svg>
+      </div>
 
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={loadingStep}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="flex flex-col items-center"
-                >
-                  <h3 className="text-[24px] font-black text-[#404145] mb-2 text-center tracking-tight">
-                    {loadingMessages[loadingStep]}
-                  </h3>
-                  <p className="text-[#62646a] font-medium text-[16px]">
-                    One moment please...
-                  </p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Soft warm/pink gradient glow behind the card for visual depth */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-[#F092DD]/5 to-transparent blur-[120px] rounded-full pointer-events-none z-0" />
+
+      {isSubmitting && (
+        <LoadingScreen text={loadingMessages[loadingStep]} />
+      )}
 
       <div
         className={`flex flex-col h-full transition-all duration-1000 ${isSubmitting ? "scale-95 opacity-50" : "scale-100 opacity-100"}`}
       >
-        <Navbar variant="skinny" userName={userName} />
+        <div className="w-full pt-6 md:pt-8 pb-0 flex justify-center z-20">
+    <img
+      src={logoIcon}
+      alt="Referr Icon"
+      className="h-24 w-24 md:h-32 md:w-32 object-contain scale-[1.2]"
+      referrerPolicy="no-referrer"
+    />
+  </div>
 
-        <main className="flex-1 flex flex-col pt-24 md:pt-24 max-w-5xl w-full mx-auto px-4 lg:px-12 overflow-hidden">
+        <main className="flex-1 flex flex-col pt-4 md:pt-6 max-w-5xl w-full mx-auto px-4 lg:px-12 overflow-hidden">
           {/* Progress Bar Fixed at Top */}
           <div className="w-full pb-6 md:pb-10 flex items-center gap-3 md:gap-4 flex-shrink-0">
-            <span className="text-[12px] md:text-[14px] font-bold text-[#404145] tracking-widest">
+            <span className="text-[12px] md:text-[14px] font-black text-[#ec4899] tracking-widest">
               {step}/3
             </span>
-            <div className="flex-1 bg-[#e4e5e7] rounded-full h-1 overflow-hidden">
+            <div className="flex-1 bg-[#f1f1f1] rounded-full h-1 overflow-hidden">
               <div
-                className="bg-[#1dbf73] h-full transition-all duration-300 ease-out"
+                className="bg-[#ec4899] h-full transition-all duration-300 ease-out"
                 style={{ width: `${(step / 3) * 100}%` }}
               ></div>
             </div>
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 w-full pb-12 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex-1 w-full pb-2 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex justify-center">
             {step === 1 && (
               <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 max-w-[800px]">
                 <h2 className="text-[24px] md:text-[40px] font-medium text-[#222325] tracking-tight leading-tight mb-3 md:mb-4">
                   A few quick questions: first, have you freelanced before?
                 </h2>
-                <p className="text-[15px] md:text-[18px] text-[#62646a] mb-6 md:mb-10 max-w-2xl font-light">
+                <p className="text-[15px] md:text-[18px] text-[#62646a] mb-4 max-w-2xl font-light">
                   Tell us about your experience level.
                 </p>
 
@@ -175,7 +139,7 @@ export default function CreateProfile() {
                   ].map((option) => (
                     <label
                       key={option.value}
-                      className="group relative flex flex-col p-6 md:p-8 border border-[#e4e5e7] bg-white rounded-xl cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-[#1dbf73] transition-all duration-300 has-[:checked]:border-[#1dbf73] has-[:checked]:ring-1 has-[:checked]:ring-[#1dbf73] has-[:checked]:bg-[#fafafa]"
+                      className="group relative flex flex-col p-6 md:p-8 border border-[#e4e5e7] bg-white rounded-xl cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-[#ec4899] transition-all duration-300 has-[:checked]:border-[#ec4899] has-[:checked]:ring-1 has-[:checked]:ring-[#ec4899] has-[:checked]:bg-[#fafafa]"
                     >
                       <input
                         type="radio"
@@ -190,7 +154,7 @@ export default function CreateProfile() {
                           }))
                         }
                       />
-                      <div className="absolute top-4 right-4 md:top-6 md:right-6 w-5 h-5 rounded-full border border-[#c5c6c9] group-has-[:checked]:border-[#1dbf73] group-has-[:checked]:bg-[#1dbf73] flex items-center justify-center transition-colors">
+                      <div className="absolute top-4 right-4 md:top-6 md:right-6 w-5 h-5 rounded-full border border-[#c5c6c9] group-has-[:checked]:border-[#ec4899] group-has-[:checked]:bg-[#ec4899] flex items-center justify-center transition-colors">
                         <svg
                           className="w-3 h-3 text-white opacity-0 group-has-[:checked]:opacity-100"
                           fill="none"
@@ -208,11 +172,11 @@ export default function CreateProfile() {
 
                       <div className="mb-6 md:mb-10">
                         <option.icon
-                          className="w-8 h-8 md:w-10 md:h-10 text-[#74767e] group-hover:text-[#1dbf73] group-has-[:checked]:text-[#1dbf73] transition-colors"
+                          className="w-8 h-8 md:w-10 md:h-10 text-[#74767e] group-hover:text-[#ec4899] group-has-[:checked]:text-[#ec4899] transition-colors"
                           strokeWidth={1}
                         />
                       </div>
-                      <span className="font-semibold text-[16px] md:text-lg text-[#222325] leading-snug">
+                      <span className="font-bold text-[15px] md:text-[16px] text-[#404145] leading-snug">
                         {option.label}
                       </span>
                     </label>
@@ -226,7 +190,7 @@ export default function CreateProfile() {
                 <h2 className="text-[24px] md:text-[40px] font-medium text-[#222325] tracking-tight leading-tight mb-3 md:mb-4">
                   Got it. What's your biggest goal for freelancing?
                 </h2>
-                <p className="text-[15px] md:text-[18px] text-[#62646a] mb-6 md:mb-10 max-w-2xl font-light">
+                <p className="text-[15px] md:text-[18px] text-[#62646a] mb-4 max-w-2xl font-light">
                   What are you looking to achieve?
                 </p>
 
@@ -255,7 +219,7 @@ export default function CreateProfile() {
                   ].map((option) => (
                     <label
                       key={option.value}
-                      className="group relative flex items-center p-4 md:p-6 border border-[#e4e5e7] bg-white rounded-xl cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-[#1dbf73] transition-all duration-300 has-[:checked]:border-[#1dbf73] has-[:checked]:ring-1 has-[:checked]:ring-[#1dbf73] has-[:checked]:bg-[#fafafa]"
+                      className="group relative flex items-center p-4 md:p-6 border border-[#e4e5e7] bg-white rounded-xl cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-[#ec4899] transition-all duration-300 has-[:checked]:border-[#ec4899] has-[:checked]:ring-1 has-[:checked]:ring-[#ec4899] has-[:checked]:bg-[#fafafa]"
                     >
                       <input
                         type="radio"
@@ -272,7 +236,7 @@ export default function CreateProfile() {
                       />
                       <div className="mr-4 md:mr-5 flex-shrink-0">
                         <option.icon
-                          className="w-7 h-7 md:w-9 md:h-9 text-[#74767e] group-hover:text-[#1dbf73] group-has-[:checked]:text-[#1dbf73] transition-colors"
+                          className="w-7 h-7 md:w-9 md:h-9 text-[#74767e] group-hover:text-[#ec4899] group-has-[:checked]:text-[#ec4899] transition-colors"
                           strokeWidth={1}
                         />
                       </div>
@@ -282,7 +246,7 @@ export default function CreateProfile() {
                         </span>
                       </div>
                       <div className="ml-4 flex-shrink-0">
-                        <div className="w-5 h-5 rounded-full border border-[#c5c6c9] group-has-[:checked]:border-[#1dbf73] group-has-[:checked]:bg-[#1dbf73] flex items-center justify-center transition-colors">
+                        <div className="w-5 h-5 rounded-full border border-[#c5c6c9] group-has-[:checked]:border-[#ec4899] group-has-[:checked]:bg-[#ec4899] flex items-center justify-center transition-colors">
                           <svg
                             className="w-3 h-3 text-white opacity-0 group-has-[:checked]:opacity-100"
                             fill="none"
@@ -309,7 +273,7 @@ export default function CreateProfile() {
                 <h2 className="text-[24px] md:text-[40px] font-medium text-[#222325] tracking-tight leading-tight mb-3 md:mb-4">
                   And how would you like to work?
                 </h2>
-                <p className="text-[15px] md:text-[18px] text-[#62646a] mb-6 md:mb-10 max-w-2xl font-light">
+                <p className="text-[15px] md:text-[18px] text-[#62646a] mb-4 max-w-2xl font-light">
                   Select your preferred ways to work.
                 </p>
 
@@ -331,7 +295,7 @@ export default function CreateProfile() {
                   ].map((option) => (
                     <label
                       key={option.value}
-                      className="group relative flex flex-col items-start p-6 md:p-8 border border-[#e4e5e7] bg-white rounded-xl cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-[#1dbf73] transition-all duration-300 has-[:checked]:border-[#1dbf73] has-[:checked]:ring-1 has-[:checked]:ring-[#1dbf73] has-[:checked]:bg-[#fafafa]"
+                      className="group relative flex flex-col items-start p-6 md:p-8 border border-[#e4e5e7] bg-white rounded-xl cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-[#ec4899] transition-all duration-300 has-[:checked]:border-[#ec4899] has-[:checked]:ring-1 has-[:checked]:ring-[#ec4899] has-[:checked]:bg-[#fafafa]"
                     >
                       <div className="absolute top-6 right-6 md:top-8 md:right-8">
                         <input
@@ -350,7 +314,7 @@ export default function CreateProfile() {
                             }));
                           }}
                         />
-                        <div className="w-5 h-5 rounded border border-[#c5c6c9] group-has-[:checked]:border-[#1dbf73] group-has-[:checked]:bg-[#1dbf73] flex items-center justify-center transition-colors">
+                        <div className="w-5 h-5 rounded border border-[#c5c6c9] group-has-[:checked]:border-[#ec4899] group-has-[:checked]:bg-[#ec4899] flex items-center justify-center transition-colors">
                           <svg
                             className="w-3.5 h-3.5 text-white opacity-0 group-has-[:checked]:opacity-100"
                             fill="none"
@@ -368,7 +332,7 @@ export default function CreateProfile() {
                       </div>
                       <div className="mb-4 md:mb-6">
                         <option.icon
-                          className="w-9 h-9 md:w-11 md:h-11 text-[#74767e] group-hover:text-[#1dbf73] group-has-[:checked]:text-[#1dbf73] transition-colors"
+                          className="w-9 h-9 md:w-11 md:h-11 text-[#74767e] group-hover:text-[#ec4899] group-has-[:checked]:text-[#ec4899] transition-colors"
                           strokeWidth={1}
                         />
                       </div>
@@ -387,11 +351,11 @@ export default function CreateProfile() {
         </main>
 
         {/* Footer fixed */}
-        <footer className="w-full bg-white border-t border-[#e4e5e7] py-4 px-6 lg:px-12 flex-shrink-0 z-10">
+        <footer className="w-full bg-transparent py-4 px-6 lg:px-12 flex-shrink-0 z-10">
           <div className="max-w-5xl mx-auto flex justify-between items-center">
             <button
               onClick={() => (step > 1 ? setStep(step - 1) : null)}
-              className={`font-bold text-[16px] px-6 py-2.5 rounded-[4px] transition-colors ${step > 1 ? "text-[#62646a] hover:bg-[#f5f5f5] cursor-pointer" : "text-[#c5c6c9] pointer-events-none opacity-0"}`}
+              className={`font-black text-[15px] md:text-[16px] uppercase tracking-widest px-6 py-3.5 rounded-[4px] transition-colors ${step > 1 ? "text-[#62646a] hover:bg-[#f5f5f5] cursor-pointer" : "text-[#c5c6c9] pointer-events-none opacity-0"}`}
             >
               Back
             </button>
@@ -399,10 +363,10 @@ export default function CreateProfile() {
             <button
               onClick={() => (step < 3 ? setStep(step + 1) : handleFinish())}
               disabled={isNextDisabled()}
-              className={`px-8 py-2.5 text-white font-bold text-[16px] rounded-[4px] transition-colors ${
+              className={`flex-1 md:flex-none px-8 py-3.5 text-white font-black text-[15px] md:text-[16px] uppercase tracking-widest rounded-[4px] shadow-md transition-all active:scale-[0.98] ${
                 isNextDisabled()
-                  ? "bg-[#1dbf73] opacity-40 cursor-not-allowed"
-                  : "bg-[#1dbf73] hover:bg-[#19a463] cursor-pointer"
+                  ? "bg-[#ec4899] opacity-40 cursor-not-allowed"
+                  : "bg-[#ec4899] hover:bg-[#db2777] cursor-pointer"
               }`}
             >
               {step < 3 ? "Next" : "Finish"}

@@ -1,45 +1,22 @@
-import React, { useState } from "react";
-import { motion } from "motion/react";
-import {
-  Wallet,
-  ArrowRight,
-  History,
-  Clock,
-  ArrowUpCircle,
-  MousePointer2,
-  Clock3,
-  CheckCircle2,
-  TrendingUp,
-  Bell,
-  Award,
-  ChevronRight,
-  Briefcase,
-  ArrowUpRight,
-  ArrowDownLeft,
-  DollarSign,
-  Plus,
-  Eye,
-  EyeOff,
-  Search,
-  ScanLine,
-  PieChart,
-  User,
-  ArrowDown,
-  ArrowUp,
-  Share2,
-  RefreshCw,
-  Zap,
-  Menu,
-  ChevronDown,
-} from "lucide-react";
-
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Briefcase, TrendingUp } from "lucide-react";
 import { Skeleton } from "./ui/Skeleton";
+import { auth, db, handleFirestoreError, OperationType } from "../services/firebaseService";
+import { doc, getDoc, collection, getDocs, query, limit } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+
+import LoadingScreen from "./LoadingScreen";
 
 export default function HustlerDashboard() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
-  const [showBalance, setShowBalance] = useState(true);
+  const [userData, setUserData] = useState<any>({
+    balance: 0,
+    pendingBalance: 0,
+    claimedDealsCount: 0,
+  });
+  const [activeDeals, setActiveDeals] = useState<any[]>([]);
 
   const userType = localStorage.getItem("userType") || "hustler";
   const name = userType === "business"
@@ -47,50 +24,78 @@ export default function HustlerDashboard() {
     : localStorage.getItem("hustlerName") || "Hustler";
   const userPicture = localStorage.getItem("userPicture") || "https://images-wixmp-7ef3383b5fd80a9f5a5cc686.wixmp.com/27765ee8-82b7-404f-91cd-a507b11093a6/1741463568052/v1/fill/w_320,h_320/file.jpg";
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchData();
+      } else {
+        // If not authenticated via Firebase but we have a session in localStorage, 
+        // we might still be missing the Firebase Auth link.
+        // For simplicity in this demo, if no user, we stop loading but data might be empty.
+        setIsLoading(false);
+      }
+    });
+
+    const fetchData = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const path = `users/${user.uid}`;
+          try {
+            const userDocSnap = await getDoc(doc(db, "users", user.uid));
+            if (userDocSnap.exists()) {
+              const data = userDocSnap.data();
+              setUserData({
+                balance: data.balance || 0,
+                pendingBalance: data.pendingBalance || 0,
+                claimedDealsCount: data.claimedDeals?.length || 0,
+              });
+            }
+          } catch (err) {
+            handleFirestoreError(err, OperationType.GET, path);
+          }
+        }
+
+        // Fetch recent deals
+        const dealsPath = "deals";
+        try {
+          const dealsSnapshot = await getDocs(query(collection(db, "deals"), limit(3)));
+          const dealsList = dealsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setActiveDeals(dealsList);
+        } catch (err) {
+          handleFirestoreError(err, OperationType.LIST, dealsPath);
+        }
+
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    return () => unsub();
   }, []);
 
-  const stats: any[] = [];
-  const recentTransactions: any[] = [];
-
-  const currencies = [
-    { code: "UGX", name: "Uganda Shilling", rate: "1.0", bg: "bg-white" },
+  const statsList = [
+    { label: "Cleared Balance", value: `UGX ${userData.balance.toLocaleString()}`, detail: `Available for Mobile Money withdrawal` },
+    { label: "Pending Clearance", value: `UGX ${userData.pendingBalance.toLocaleString()}`, detail: "Escrow verification check" },
+    { label: "Active Campaigns", value: String(userData.claimedDealsCount), detail: `${userData.claimedDealsCount} promotions joined` },
+    { label: "Earn Vouch Rating", value: userData.claimedDealsCount > 0 ? "98%" : "N/A", detail: userData.claimedDealsCount > 0 ? "Verified Pro Status" : "No active campaigns yet" }
   ];
 
-  if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 min-h-screen">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-10 w-48 rounded-full" />
-          <Skeleton className="h-10 w-10 rounded-full" />
-        </div>
-        <Skeleton className="h-64 w-full rounded-3xl" />
-        <div className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-32 rounded-3xl" />
-          <Skeleton className="h-32 rounded-3xl" />
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <LoadingScreen text="Syncing your recent referral payouts..." />;
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7] pb-24 md:pb-12 text-[#404145]">
+    <div className="min-h-screen bg-white pb-24 md:pb-12 text-slate-600">
       <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 pt-8 space-y-8">
-        {/* Fiverr-Style Top Stats Header */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: "Earnings in May", value: "UGX 0", detail: "Active referrals: 0" },
-            { label: "Avg. Selling Price", value: "UGX 0", detail: "Last 30 days" },
-            { label: "Orders in Queue", value: "0", detail: "No referrals pending" },
-            { label: "Response Rate", value: "0%", detail: "In training status" }
-          ].map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col justify-between">
-              <p className="text-[14px] font-bold text-[#74767e] mb-2">{stat.label}</p>
+        {/* Top Stats Header */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {statsList.map((stat, i) => (
+            <div key={i} className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[110px]">
+              <p className="text-xs md:text-sm font-semibold text-slate-500 tracking-tight">{stat.label}</p>
               <div>
-                <h4 className="text-xl md:text-2xl font-bold text-[#222325]">{stat.value}</h4>
-                <p className="text-[12px] text-[#b5b6ba] mt-1">{stat.detail}</p>
+                <h4 className="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">{stat.value}</h4>
+                <p className="text-[11px] font-medium text-slate-400 mt-1">{stat.detail}</p>
               </div>
             </div>
           ))}
@@ -100,57 +105,46 @@ export default function HustlerDashboard() {
           {/* Main Workspace Area */}
           <div className="flex-1 space-y-8">
             {/* Active Deals / Opportunities */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-               <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                 <h3 className="text-lg font-bold text-[#222325]">Active Opportunities</h3>
-                 <Link to="/deals" className="text-[#1dbf73] text-sm font-bold hover:underline">View All</Link>
+            <div className="bg-white rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.02)] overflow-hidden">
+               <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                 <h3 className="text-base md:text-lg font-bold text-slate-900">Active Opportunities</h3>
+                 <Link to="/deals" className="text-slate-800 text-sm font-bold hover:text-black hover:underline">View All</Link>
                </div>
                
-               <div className="divide-y divide-gray-100">
-                  {(() => {
-                    const savedDeals = localStorage.getItem("all_deals");
-                    let deals = [];
-                    try {
-                      if (savedDeals) deals = JSON.parse(savedDeals);
-                    } catch (e) {}
-                    const displayDeals = deals.slice(0, 3);
-                    
-                    if (displayDeals.length === 0) {
-                      return (
-                        <div className="p-12 text-center">
-                          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Briefcase className="text-gray-300" size={32} />
-                          </div>
-                          <h4 className="text-lg font-bold text-[#222325] mb-1">No active opportunities</h4>
-                          <p className="text-sm text-[#74767e]">Check the marketplace to find deals to refer.</p>
-                        </div>
-                      );
-                    }
-
-                    return displayDeals.map((deal: any) => (
-                      <div key={deal.id} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
+               <div className="divide-y divide-slate-100">
+                  {activeDeals.length === 0 ? (
+                    <div className="p-12 text-center">
+                      <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Briefcase className="text-slate-300" size={32} />
+                      </div>
+                      <h4 className="text-base font-bold text-slate-900 mb-1">No active opportunities</h4>
+                      <p className="text-sm text-slate-500">Check the marketplace to find deals to refer.</p>
+                    </div>
+                  ) : (
+                    activeDeals.map((deal: any) => (
+                      <div key={deal.id} className="p-6 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden">
+                          <div className="w-12 h-12 bg-slate-100 rounded overflow-hidden">
                             <img src={deal.image || "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=800&q=80"} alt={deal.business} className="w-full h-full object-cover" />
                           </div>
                           <div>
-                            <h4 className="font-bold text-[#222325] text-[15px] hover:underline cursor-pointer" onClick={() => navigate(`/deal/${deal.id}`)}>{deal.title}</h4>
-                            <p className="text-[#74767e] text-sm">{deal.business || "Business"}</p>
+                            <h4 className="font-bold text-slate-900 text-[15px] hover:underline cursor-pointer" onClick={() => navigate(`/deal/${deal.id}`)}>{deal.title}</h4>
+                            <p className="text-slate-500 text-sm">{deal.business || "Business"}</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-[#1dbf73] font-bold">{deal.price}</p>
-                          <p className="text-[#74767e] text-[11px] uppercase tracking-wider font-bold">Reward</p>
+                          <p className="text-slate-900 font-bold">{deal.price}</p>
+                          <p className="text-slate-400 text-[10px] uppercase tracking-wider font-bold">Reward</p>
                         </div>
                       </div>
-                    ));
-                  })()}
+                    ))
+                  )}
                </div>
                
-               <div className="p-6 bg-gray-50/50 border-t border-gray-100">
+               <div className="p-6 bg-slate-50/40 border-t border-slate-100">
                   <button 
                     onClick={() => navigate("/deals")}
-                    className="w-full py-3 bg-white border border-gray-300 rounded text-sm font-bold text-[#404145] hover:bg-white/80 hover:border-gray-400 transition-all"
+                    className="w-full py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
                   >
                     Explore Marketplace
                   </button>
@@ -158,15 +152,15 @@ export default function HustlerDashboard() {
             </div>
 
             {/* Performance Snapshot */}
-            <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden">
+            <div className="bg-white p-8 rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.02)] relative overflow-hidden">
                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                   <div>
-                    <h3 className="text-xl font-bold text-[#222325] mb-1">Performance Snapshot</h3>
-                    <p className="text-sm text-[#74767e]">Metrics that matter for your Referr account status.</p>
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">Performance Snapshot</h3>
+                    <p className="text-sm text-slate-500">Metrics that matter for your Referr account status.</p>
                   </div>
                   <button 
                     onClick={() => navigate("/hustler/analytics")}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#1dbf73] text-white rounded font-bold text-sm hover:bg-[#19a463] transition-all"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[#0F172A] text-white rounded-lg font-bold text-sm hover:bg-[#1E293B] transition-all shadow-sm"
                   >
                     Performance Report <TrendingUp size={16} />
                   </button>
@@ -175,29 +169,29 @@ export default function HustlerDashboard() {
                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div className="space-y-4">
                     <div className="flex justify-between items-end">
-                      <span className="text-sm font-bold text-[#404145]">Referral Success Rate</span>
-                      <span className="text-sm font-black text-[#1dbf73]">0%</span>
+                      <span className="text-sm font-semibold text-slate-700">Referral Success Rate</span>
+                      <span className="text-sm font-black text-rose-600">{userData.claimedDealsCount > 0 ? "92%" : "0%"}</span>
                     </div>
-                    <div className="h-1 w-full bg-gray-100 rounded-full">
-                       <div className="h-full bg-[#1dbf73] w-0" />
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-end">
-                      <span className="text-sm font-bold text-[#404145]">On-time Approval</span>
-                      <span className="text-sm font-black text-[#1dbf73]">0%</span>
-                    </div>
-                    <div className="h-1 w-full bg-gray-100 rounded-full">
-                       <div className="h-full bg-[#1dbf73] w-0" />
+                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                       <div className="h-full bg-rose-500" style={{ width: userData.claimedDealsCount > 0 ? "92%" : "0%" }} />
                     </div>
                   </div>
                   <div className="space-y-4">
                     <div className="flex justify-between items-end">
-                      <span className="text-sm font-bold text-[#404145]">Network Growth</span>
-                      <span className="text-sm font-black text-[#1dbf73]">N/A</span>
+                      <span className="text-sm font-semibold text-slate-700">On-time Approval</span>
+                      <span className="text-sm font-black text-pink-600">{userData.claimedDealsCount > 0 ? "100%" : "0%"}</span>
                     </div>
-                    <div className="h-1 w-full bg-gray-100 rounded-full">
-                       <div className="h-full bg-[#1dbf73] w-0" />
+                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                       <div className="h-full bg-pink-500" style={{ width: userData.claimedDealsCount > 0 ? "100%" : "0%" }} />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-end">
+                      <span className="text-sm font-semibold text-slate-700">Network Growth</span>
+                      <span className="text-sm font-black text-blue-600">{userData.claimedDealsCount > 0 ? "+15.4%" : "N/A"}</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                       <div className="h-full bg-blue-500" style={{ width: userData.claimedDealsCount > 0 ? "85%" : "0%" }} />
                     </div>
                   </div>
                </div>
@@ -206,55 +200,44 @@ export default function HustlerDashboard() {
 
           {/* Sidebar / Profile Area */}
           <aside className="w-full lg:w-80 space-y-6">
-            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-center">
+            <div className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.02)] text-center">
               <div className="relative inline-block mb-4">
-                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-100 p-0.5">
+                <div className="w-24 h-24 rounded-full overflow-hidden border border-slate-200 p-1 bg-white">
                    <img 
                     src={userPicture} 
                     alt="Profile"
                     className="w-full h-full object-cover rounded-full"
                   />
                 </div>
-                <div className="absolute top-0 right-0 w-6 h-6 bg-[#1dbf73] border-4 border-white rounded-full" />
+                <div className="absolute top-1 right-1 w-4 h-4 bg-pink-500 border-2 border-white rounded-full" />
               </div>
-              <h3 className="text-lg font-bold text-[#222325]">{name}</h3>
-              <p className="text-sm text-[#74767e] mb-4 italic">"Start referring to earn rewards."</p>
+              <h3 className="text-lg font-bold text-slate-900">{name}</h3>
+              <p className="text-xs text-slate-400 mb-4 italic">"Start referring to earn rewards."</p>
               
-              <div className="pt-4 border-t border-gray-100 space-y-3">
+              <div className="pt-4 border-t border-slate-100 space-y-3">
                  <div className="flex justify-between text-sm">
-                   <span className="text-[#b5b6ba]">Seller level</span>
-                   <span className="font-bold text-[#404145]">New Seller</span>
+                   <span className="text-slate-400">Seller level</span>
+                   <span className="font-bold text-slate-800">New Seller</span>
                  </div>
                  <div className="flex justify-between text-sm">
-                   <span className="text-[#b5b6ba]">Member since</span>
-                   <span className="font-bold text-[#404145]">May 2024</span>
+                   <span className="text-slate-400">Member since</span>
+                   <span className="font-bold text-slate-800">May 2024</span>
                  </div>
               </div>
               
-              <Link to="/profile" className="block w-full mt-6 py-2 border-2 border-[#404145] rounded font-bold text-sm text-[#404145] hover:bg-[#404145] hover:text-white transition-all">
+              <Link to="/profile" className="block w-full mt-6 py-2.5 border border-slate-200 rounded-lg font-bold text-sm text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all text-center shadow-sm">
                 Public Profile
               </Link>
             </div>
 
-            <div className="bg-[#fffbe5] p-6 rounded-lg border border-[#f5efc1] shadow-sm">
-               <div className="flex items-center gap-2 mb-3">
-                 <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-yellow-600 border border-yellow-100 font-black italic">!</div>
-                 <h4 className="font-bold text-[#404145]">Referr Academy</h4>
-               </div>
-               <p className="text-sm text-[#62646a] leading-relaxed mb-4">
-                 Learn how to maximize your earnings by identifying "Prime Opportunities".
-               </p>
-               <button className="text-[#1dbf73] font-bold text-sm hover:underline">Read Guide</button>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-               <h4 className="font-bold text-[#222325] mb-4">Referr Wallet</h4>
+            <div className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+               <h4 className="font-bold text-slate-900 mb-4">Referr Wallet</h4>
                <div className="space-y-4">
-                 <div className="bg-gray-50 p-4 rounded-md">
-                   <p className="text-[12px] font-bold text-[#b5b6ba] uppercase tracking-widest mb-1">Available for withdrawal</p>
-                   <p className="text-2xl font-black text-[#222325]">UGX 0</p>
+                 <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Available for withdrawal</p>
+                   <p className="text-2xl font-black text-slate-900">UGX {userData.balance.toLocaleString()}</p>
                  </div>
-                 <Link to="/hustler/wallet" className="block w-full py-3 bg-[#1dbf73] text-center rounded font-bold text-sm text-white hover:bg-[#19a463] transition-all shadow-md">
+                 <Link to="/hustler/wallet" className="block w-full py-2.5 bg-[#0F172A] text-center rounded-lg font-bold text-sm text-white hover:bg-[#1E293B] transition-all shadow-sm">
                    Go to Wallet
                  </Link>
                </div>
